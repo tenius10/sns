@@ -11,6 +11,6 @@ public interface PostService {
     void remove(Long pno);
     PageResponseDTO<PostWithCountDTO> readPage(PageRequestDTO pageRequestDTO);
     boolean isPostWriter(Long pno, String uid);
-    PostDTO like(Long pno, String uid);
-    PostDTO unlike(Long pno, String uid);
+    PostWithCountDTO like(Long pno, String uid);
+    PostWithCountDTO unlike(Long pno, String uid);
 }

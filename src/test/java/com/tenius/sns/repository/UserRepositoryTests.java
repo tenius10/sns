@@ -11,7 +11,7 @@ public class UserRepositoryTests {
 
     @Test
     public void testDelete(){
-        String uid="ugFyVwlT2nqdZH6F";
+        String uid="UFPJ1P71lyJM8xNA";
         userRepository.deleteById(uid);
     }
 }

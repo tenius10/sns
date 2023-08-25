@@ -62,7 +62,7 @@ public class CommentController {
     }
 
     @ApiOperation("특정 댓글 좋아요")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and !@commentServiceImpl.isCommentWriter(#cno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
     @PostMapping("/{cno}/like")
     public ResponseEntity<CommentDTO> like(@PathVariable Long pno, @PathVariable Long cno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -72,7 +72,7 @@ public class CommentController {
     }
 
     @ApiOperation("특정 댓글 좋아요 취소")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and !@commentServiceImpl.isCommentWriter(#cno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
     @DeleteMapping("/{cno}/like")
     public ResponseEntity<CommentDTO> unlike(@PathVariable Long pno, @PathVariable Long cno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();

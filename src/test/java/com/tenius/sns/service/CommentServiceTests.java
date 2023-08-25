@@ -14,16 +14,13 @@ public class CommentServiceTests {
 
     @Test
     public void testRegister(){
-        String uid="ugFyVwlT2nqdZH6F";
-        for(Long pno=100L;pno<=104L;pno++){
-            for(int i=1;i<=pno-99;i++){
-                CommentDTO commentDTO=CommentDTO.builder()
-                        .content("댓글 서비스 테스트..."+i)
-                        .build();
-                CommentDTO result=commentService.register(commentDTO, pno, uid);
-                log.info(result);
-            }
-        }
+        String uid="ZEUkANTjpFsEt7Zy";
+        Long pno=3L;
+        CommentDTO commentDTO=CommentDTO.builder()
+                .content("게시글 2> 댓글 2")
+                .build();
+        CommentDTO result=commentService.register(commentDTO, pno, uid);
+        log.info(result);
     }
     @Test
     public void testReadOne(){
@@ -46,8 +43,8 @@ public class CommentServiceTests {
 
     @Test
     public void testLike(){
-        Long cno=83L;
-        String uid="bgzY3mS0KbElSTub";
+        Long cno=7L;
+        String uid="UFPJ1P71lyJM8xNA";
         CommentDTO result=commentService.like(cno,uid);
         log.info(result);
     }

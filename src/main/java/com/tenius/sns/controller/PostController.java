@@ -64,7 +64,7 @@ public class PostController {
     }
 
     @ApiOperation("게시글 좋아요")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and !@postServiceImpl.isPostWriter(#pno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
     @PostMapping("/{pno}/like")
     public ResponseEntity<PostDTO> like(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -74,7 +74,7 @@ public class PostController {
     }
 
     @ApiOperation("게시글 좋아요 취소")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and !@postServiceImpl.isPostWriter(#pno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
     @DeleteMapping("/{pno}/like")
     public ResponseEntity<PostDTO> unlike(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();

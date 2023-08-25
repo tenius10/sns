@@ -44,9 +44,9 @@ public class PostRepositoryTests {
     }
     @Test
     public void testRead(){
-        Long pno=2L;
+        Long pno=3L;
         Post result=postRepository.findById(pno).orElseThrow();
-        log.info(result);
+        log.info(result.getWriter().getUid());
     }
     @Test
     public void testUpdate(){

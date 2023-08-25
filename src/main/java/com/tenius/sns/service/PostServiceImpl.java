@@ -80,7 +80,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDTO like(Long pno, String uid){
+    public PostWithCountDTO like(Long pno, String uid){
         PostStatusKey key=PostStatusKey.builder().pno(pno).uid(uid).build();
         Optional<PostStatus> optional=postStatusRepository.findById(key);
 
@@ -93,12 +93,12 @@ public class PostServiceImpl implements PostService {
             postStatusRepository.saveWithCheck(postStatus);
         }
 
-        Post result=postRepository.findById(pno).orElseThrow();
-        return modelMapper.map(result, PostDTO.class);
+        PostWithCountDTO result=postRepository.findByIdWithAll(pno).orElseThrow();
+        return result;
     }
 
     @Override
-    public PostDTO unlike(Long pno, String uid){
+    public PostWithCountDTO unlike(Long pno, String uid){
         PostStatusKey key=PostStatusKey.builder().pno(pno).uid(uid).build();
         Optional<PostStatus> optional=postStatusRepository.findById(key);
 
@@ -109,7 +109,7 @@ public class PostServiceImpl implements PostService {
             postStatusRepository.saveWithCheck(postStatus);
         }
 
-        Post result=postRepository.findById(pno).orElseThrow();
-        return modelMapper.map(result, PostDTO.class);
+        PostWithCountDTO result=postRepository.findByIdWithAll(pno).orElseThrow();
+        return result;
     }
 }

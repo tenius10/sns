@@ -15,9 +15,9 @@ public class PostServiceTests {
 
     @Test
     public void testRegister(){
-        String uid="ugFyVwlT2nqdZH6F";
+        String uid="ZEUkANTjpFsEt7Zy";
         PostDTO postDTO=PostDTO.builder()
-                .content("서비스 등록 테스트")
+                .content("게시글 2")
                 .views(0)
                 .build();
         PostDTO result=postService.register(postDTO, uid);
@@ -25,14 +25,14 @@ public class PostServiceTests {
     }
     @Test
     public void testReadOne(){
-        Long pno=104L;
+        Long pno=1L;
         PostCommentPageDTO result=postService.readOne(pno);
         log.info(result);
         result.getCommentPage().getContent().forEach(commentDTO -> log.info(commentDTO));
     }
     @Test
     public void testView(){
-        Long pno=104L;
+        Long pno=1L;
         PostCommentPageDTO result=postService.view(pno);
         log.info(result);
         result.getCommentPage().getContent().forEach(commentDTO -> log.info(commentDTO));
@@ -48,7 +48,7 @@ public class PostServiceTests {
     }
     @Test
     public void testRemove(){
-        Long pno=5L;
+        Long pno=1L;
         postService.remove(pno);
     }
     @Test
@@ -64,15 +64,15 @@ public class PostServiceTests {
 
     @Test
     public void testLike(){
-        Long pno=5L;
-        String uid="ugFyVwlT2nqdZH6F";
+        Long pno=2L;
+        String uid="ZEUkANTjpFsEt7Zy";
         PostDTO result=postService.like(pno,uid);
         log.info(result);
     }
     @Test
     public void testUnlike(){
         Long pno=1L;
-        String uid="bgzY3mS0KbElSTub";
+        String uid="ugFyVwlT2nqdZH6F";
         PostDTO result=postService.unlike(pno, uid);
         log.info(result);
     }

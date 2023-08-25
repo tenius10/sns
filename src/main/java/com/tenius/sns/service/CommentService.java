@@ -12,6 +12,6 @@ public interface CommentService {
     void remove(Long cno);
     PageResponseDTO<CommentWithCountDTO> readPage(Long pno, PageRequestDTO pageRequestDTO);
     boolean isCommentWriter(Long cno, String uid);
-    CommentDTO like(Long cno, String uid);
-    CommentDTO unlike(Long cno, String uid);
+    CommentWithCountDTO like(Long cno, String uid);
+    CommentWithCountDTO unlike(Long cno, String uid);
 }

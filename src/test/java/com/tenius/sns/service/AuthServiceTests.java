@@ -18,7 +18,7 @@ public class AuthServiceTests {
         SignUpRequestDTO signUpRequestDTO= SignUpRequestDTO.builder()
                 .username("testuser2")
                 .password("testpassword2")
-                .nickname("계란토스트")
+                .nickname("테스트2")
                 .build();
         UserInfoDTO result=authService.registerUser(signUpRequestDTO);
         log.info(result);

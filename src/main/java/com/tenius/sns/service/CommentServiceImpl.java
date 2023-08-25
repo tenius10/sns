@@ -72,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDTO like(Long cno, String uid){
+    public CommentWithCountDTO like(Long cno, String uid){
         CommentStatusKey key=CommentStatusKey.builder().cno(cno).uid(uid).build();
         Optional<CommentStatus> optional=commentStatusRepository.findById(key);
 
@@ -85,12 +85,12 @@ public class CommentServiceImpl implements CommentService {
             commentStatusRepository.saveWithCheck(commentStatus);
         }
 
-        Comment result=commentRepository.findById(cno).orElseThrow();
-        return modelMapper.map(result, CommentDTO.class);
+        CommentWithCountDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
+        return result;
     }
 
     @Override
-    public CommentDTO unlike(Long cno, String uid){
+    public CommentWithCountDTO unlike(Long cno, String uid){
         CommentStatusKey key=CommentStatusKey.builder().cno(cno).uid(uid).build();
         Optional<CommentStatus> optional=commentStatusRepository.findById(key);
 
@@ -101,7 +101,7 @@ public class CommentServiceImpl implements CommentService {
             commentStatusRepository.saveWithCheck(commentStatus);
         }
 
-        Comment result=commentRepository.findById(cno).orElseThrow();
-        return modelMapper.map(result, CommentDTO.class);
+        CommentWithCountDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
+        return result;
     }
 }
