@@ -2,7 +2,7 @@ package com.tenius.sns.dto;
 
 import lombok.*;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.*;
 
 @Data
 @AllArgsConstructor

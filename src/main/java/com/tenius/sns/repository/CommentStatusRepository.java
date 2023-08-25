@@ -3,9 +3,7 @@ package com.tenius.sns.repository;
 import com.tenius.sns.domain.CommentStatus;
 import com.tenius.sns.domain.CommentStatusKey;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+
 
 public interface CommentStatusRepository extends JpaRepository<CommentStatus, CommentStatusKey> {
     /**

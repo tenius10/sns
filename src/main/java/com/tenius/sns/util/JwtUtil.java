@@ -7,8 +7,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -16,6 +14,10 @@ import java.util.Date;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
 
 @Component
 @Log4j2
@@ -26,8 +28,8 @@ public class JwtUtil {
 
     @Value("${com.tenius.jwt.secret}")
     private String jwtSecret;
-    private final int ACCESS_TOKEN_EXPIRATION_SECOND=60*10;  //10분
-    private final int REFRESH_TOKEN_EXPIRATION_SECOND=60*60*24*10;  //10일
+    private final int ACCESS_TOKEN_EXPIRATION_SEC=60*10;  //10분
+    private final int REFRESH_TOKEN_EXPIRATION_SEC=60*60*24*10;  //10일
 
     public String getAccessTokenFromCookies(HttpServletRequest request) {
         return getTokenFromCookies(request, ACCESS_TOKEN);
@@ -40,10 +42,10 @@ public class JwtUtil {
         return getAccessTokenCookie(authentication.getName());
     }
     public ResponseCookie getAccessTokenCookie(String username){
-        String jwt = generateTokenFromUsername(username, ACCESS_TOKEN_EXPIRATION_SECOND);
+        String jwt = generateTokenFromUsername(username, ACCESS_TOKEN_EXPIRATION_SEC);
         return ResponseCookie.from(ACCESS_TOKEN, jwt)
                 .path("/")
-                .maxAge(ACCESS_TOKEN_EXPIRATION_SECOND)
+                .maxAge(ACCESS_TOKEN_EXPIRATION_SEC)
                 .httpOnly(true)
                 .build();
     }
@@ -53,10 +55,10 @@ public class JwtUtil {
         return getRefreshTokenCookie(authentication.getName());
     }
     public ResponseCookie getRefreshTokenCookie(String username){
-        String jwt = generateTokenFromUsername(username, REFRESH_TOKEN_EXPIRATION_SECOND);
+        String jwt = generateTokenFromUsername(username, REFRESH_TOKEN_EXPIRATION_SEC);
         return ResponseCookie.from(REFRESH_TOKEN, jwt)
                 .path("/")
-                .maxAge(REFRESH_TOKEN_EXPIRATION_SECOND)
+                .maxAge(REFRESH_TOKEN_EXPIRATION_SEC)
                 .httpOnly(true)
                 .build();
     }

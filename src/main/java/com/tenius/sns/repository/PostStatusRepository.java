@@ -3,8 +3,7 @@ package com.tenius.sns.repository;
 import com.tenius.sns.domain.PostStatus;
 import com.tenius.sns.domain.PostStatusKey;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+
 
 public interface PostStatusRepository extends JpaRepository<PostStatus, PostStatusKey> {
     /**

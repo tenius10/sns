@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public class CommentSearchImpl extends QuerydslRepositorySupport implements CommentSearch {
     public CommentSearchImpl(){
@@ -24,10 +25,15 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
         //Q 도메인
         QUserInfo userInfo=QUserInfo.userInfo;
         QComment comment=QComment.comment;
+        QCommentStatus commentStatus=QCommentStatus.commentStatus;
 
-        //comment 테이블과 user_info 테이블 LEFT JOIN
+        //comment 테이블과 user_info 테이블, comment_status 테이블 LEFT JOIN
         JPQLQuery<Comment> query=from(comment)
-                .leftJoin(userInfo).on(comment.writer.eq(userInfo));
+                .leftJoin(userInfo)
+                .on(comment.writer.eq(userInfo))
+                .leftJoin(commentStatus)
+                .on(comment.cno.eq(commentStatus.cno), commentStatus.liked.isTrue())
+                .groupBy(comment);
 
         //where 설정
         query.where(comment.post.pno.eq(pno));
@@ -44,17 +50,17 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
         //페이징 설정
         this.getQuerydsl().applyPagination(pageable, query);
 
-        List<CommentDTO> dtoList=query.select(Projections.bean(CommentDTO.class,
+        List<CommentWithCountDTO> dtoList=query.select(Projections.bean(CommentWithCountDTO.class,
                 comment.cno,
                 comment.content,
                 comment.post.pno.as("pno"),
                 comment.regDate,
                 comment.modDate,
-                comment.likes,
                 Projections.bean(UserInfoDTO.class,
                         userInfo.uid.as("uid"),
                         userInfo.nickname.as("nickname")
-                ).as("writer")
+                ).as("writer"),
+                commentStatus.count().as("likeCount")
         )).fetch();
 
         pageable=pageRequestDTO.getPageable();
@@ -64,9 +70,43 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
             hasNext=true;
         }
 
-        return PageResponseDTO.<CommentDTO>builder()
+        return PageResponseDTO.<CommentWithCountDTO>builder()
                 .content(dtoList)
                 .hasNext(hasNext)
                 .build();
+    }
+
+    @Override
+    public Optional<CommentWithCountDTO> findByIdWithAll(Long cno){
+        //Q 도메인
+        QUserInfo userInfo=QUserInfo.userInfo;
+        QComment comment=QComment.comment;
+        QCommentStatus commentStatus=QCommentStatus.commentStatus;
+
+        //comment 테이블과 user_info 테이블, comment_status 테이블 LEFT JOIN
+        JPQLQuery<Comment> query=from(comment)
+                .leftJoin(userInfo)
+                .on(comment.writer.eq(userInfo))
+                .leftJoin(commentStatus)
+                .on(comment.cno.eq(commentStatus.cno), commentStatus.liked.isTrue())
+                .groupBy(comment);
+
+        //where 설정
+        query.where(comment.cno.eq(cno));
+
+        List<CommentWithCountDTO> dtoList=query.select(Projections.bean(CommentWithCountDTO.class,
+                comment.cno,
+                comment.content,
+                comment.post.pno.as("pno"),
+                comment.regDate,
+                comment.modDate,
+                Projections.bean(UserInfoDTO.class,
+                        userInfo.uid.as("uid"),
+                        userInfo.nickname.as("nickname")
+                ).as("writer"),
+                commentStatus.count().as("likeCount")
+        )).fetch();
+
+        return Optional.ofNullable(dtoList.size()>0?dtoList.get(0):null);
     }
 }

@@ -22,16 +22,16 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse resp) throws AuthenticationException, IOException, ServletException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         log.info("Login Filter.........");
 
         //GET 방식으로 호출하면 request 에서 NullPointerException 발생
-        if(req.getMethod().equalsIgnoreCase("GET")){
+        if(request.getMethod().equalsIgnoreCase("GET")){
             log.info("GET METHOD NOT SUPPORT");
             return null;
         }
 
-        Map<String, String> requestJson=parseRequestJSON(req);
+        Map<String, String> requestJson=parseRequestJSON(request);
         UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(
                 requestJson.get("username"),
                 requestJson.get("password")
@@ -41,8 +41,8 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         return authentication;
     }
 
-    private Map<String, String> parseRequestJSON(HttpServletRequest req){
-        try(Reader reader=new InputStreamReader(req.getInputStream())){
+    private Map<String, String> parseRequestJSON(HttpServletRequest request){
+        try(Reader reader=new InputStreamReader(request.getInputStream())){
             Gson gson=new Gson();
             return gson.fromJson(reader, Map.class);
         }catch(Exception e){

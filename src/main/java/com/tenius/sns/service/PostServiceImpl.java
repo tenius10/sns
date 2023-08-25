@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
@@ -32,7 +32,6 @@ public class PostServiceImpl implements PostService {
                 .content(postDTO.getContent())
                 .writer(userInfo)
                 .views(0)
-                .likes(0)
                 .build();
         Post result=postRepository.save(post);
         return modelMapper.map(result, PostDTO.class);
@@ -41,17 +40,17 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostCommentPageDTO readOne(Long pno) {
         PostWithCountDTO postCommentCountDTO=postRepository.findByIdWithAll(pno).orElseThrow();
-        PageResponseDTO<CommentDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
+        PageResponseDTO<CommentWithCountDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
         return new PostCommentPageDTO(postCommentCountDTO, commentPage);
     }
 
     @Override
     public PostCommentPageDTO view(Long pno){
         Post post=postRepository.findById(pno).orElseThrow();
-        postRepository.save(new Post(post, post.getViews()+1, post.getLikes()));
+        postRepository.save(new Post(post, post.getViews()+1));
 
         PostWithCountDTO postCommentCountDTO=postRepository.findByIdWithAll(pno).orElseThrow();
-        PageResponseDTO<CommentDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
+        PageResponseDTO<CommentWithCountDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
         return new PostCommentPageDTO(postCommentCountDTO, commentPage);
     }
 
@@ -92,8 +91,6 @@ public class PostServiceImpl implements PostService {
                     : optional.get();
             postStatus=new PostStatus(postStatus, true, postStatus.isHided());
             postStatusRepository.saveWithCheck(postStatus);
-            Post post=postRepository.findById(pno).orElseThrow();
-            post=postRepository.save(new Post(post, post.getViews(), post.getLikes()+1));
         }
 
         Post result=postRepository.findById(pno).orElseThrow();
@@ -110,8 +107,6 @@ public class PostServiceImpl implements PostService {
             PostStatus postStatus=optional.get();
             postStatus=new PostStatus(postStatus, false, postStatus.isHided());
             postStatusRepository.saveWithCheck(postStatus);
-            Post post=postRepository.findById(pno).orElseThrow();
-            post=postRepository.save(new Post(post, post.getViews(), post.getLikes()-1));
         }
 
         Post result=postRepository.findById(pno).orElseThrow();

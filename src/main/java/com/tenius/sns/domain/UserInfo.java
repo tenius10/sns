@@ -3,7 +3,6 @@ package com.tenius.sns.domain;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 @Entity
 @Table(name="user_info", uniqueConstraints = {

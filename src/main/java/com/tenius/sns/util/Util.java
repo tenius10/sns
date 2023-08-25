@@ -3,8 +3,8 @@ package com.tenius.sns.util;
 import com.tenius.sns.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.security.SecureRandom;
 
 @Component

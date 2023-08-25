@@ -2,6 +2,7 @@ package com.tenius.sns.service;
 
 import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.CommentDTO;
+import com.tenius.sns.dto.CommentWithCountDTO;
 import com.tenius.sns.dto.PageRequestDTO;
 import com.tenius.sns.dto.PageResponseDTO;
 import com.tenius.sns.repository.CommentRepository;
@@ -11,8 +12,8 @@ import com.tenius.sns.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
@@ -39,9 +40,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDTO readOne(Long cno){
-        Comment result=commentRepository.findById(cno).orElseThrow();
-        return modelMapper.map(result, CommentDTO.class);
+    public CommentWithCountDTO readOne(Long cno){
+        CommentWithCountDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
+        return result;
     }
 
     @Override
@@ -59,8 +60,8 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public PageResponseDTO<CommentDTO> readPage(Long pno, PageRequestDTO pageRequestDTO){
-        PageResponseDTO<CommentDTO> result=commentRepository.search(pno, pageRequestDTO);
+    public PageResponseDTO<CommentWithCountDTO> readPage(Long pno, PageRequestDTO pageRequestDTO){
+        PageResponseDTO<CommentWithCountDTO> result=commentRepository.search(pno, pageRequestDTO);
         return result;
     }
 
@@ -82,8 +83,6 @@ public class CommentServiceImpl implements CommentService {
                     : optional.get();
             commentStatus=new CommentStatus(commentStatus, true, commentStatus.isHided());
             commentStatusRepository.saveWithCheck(commentStatus);
-            Comment comment=commentRepository.findById(cno).orElseThrow();
-            comment=commentRepository.save(new Comment(comment, comment.getLikes()+1));
         }
 
         Comment result=commentRepository.findById(cno).orElseThrow();
@@ -100,8 +99,6 @@ public class CommentServiceImpl implements CommentService {
             CommentStatus commentStatus=optional.get();
             commentStatus=new CommentStatus(commentStatus, false, commentStatus.isHided());
             commentStatusRepository.saveWithCheck(commentStatus);
-            Comment comment=commentRepository.findById(cno).orElseThrow();
-            comment=commentRepository.save(new Comment(comment, comment.getLikes()-1));
         }
 
         Comment result=commentRepository.findById(cno).orElseThrow();

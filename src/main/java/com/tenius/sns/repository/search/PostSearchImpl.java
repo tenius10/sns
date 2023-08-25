@@ -2,10 +2,7 @@ package com.tenius.sns.repository.search;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
-import com.tenius.sns.domain.Post;
-import com.tenius.sns.domain.QComment;
-import com.tenius.sns.domain.QPost;
-import com.tenius.sns.domain.QUserInfo;
+import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.*;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -29,11 +26,13 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         QPost post= QPost.post;
         QUserInfo userInfo=QUserInfo.userInfo;
         QComment comment=QComment.comment;
+        QPostStatus postStatus=QPostStatus.postStatus;
 
         //post 테이블과 user_info, comment 테이블 LEFT JOIN
         JPQLQuery<Post> query=from(post)
                 .leftJoin(userInfo).on(post.writer.eq(userInfo))
                 .leftJoin(comment).on(comment.post.eq(post))
+                .leftJoin(postStatus).on(post.pno.eq(postStatus.pno), postStatus.liked.isTrue())
                 .groupBy(post);
 
         //pivot 설정
@@ -55,12 +54,12 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
                 post.regDate,
                 post.modDate,
                 post.views,
-                post.likes,
                 Projections.bean(UserInfoDTO.class,
                         userInfo.uid.as("uid"),
                         userInfo.nickname.as("nickname")
                 ).as("writer"),
-                comment.count().as("commentCount")
+                comment.count().as("commentCount"),
+                postStatus.count().as("likeCount")
         )).fetch();
 
         pageable=pageRequestDTO.getPageable();
@@ -82,11 +81,13 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         QPost post= QPost.post;
         QUserInfo userInfo=QUserInfo.userInfo;
         QComment comment=QComment.comment;
+        QPostStatus postStatus=QPostStatus.postStatus;
 
         //post 테이블과 user_info, comment 테이블 LEFT JOIN
         JPQLQuery<Post> query=from(post)
                 .leftJoin(userInfo).on(post.writer.eq(userInfo))
                 .leftJoin(comment).on(comment.post.eq(post))
+                .leftJoin(postStatus).on(post.pno.eq(postStatus.pno), postStatus.liked.isTrue())
                 .groupBy(post);
 
         query.where(post.pno.eq(pno));
@@ -97,12 +98,12 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
                 post.regDate,
                 post.modDate,
                 post.views,
-                post.likes,
                 Projections.bean(UserInfoDTO.class,
                         userInfo.uid.as("uid"),
                         userInfo.nickname.as("nickname")
                 ).as("writer"),
-                comment.count().as("commentCount")
+                comment.count().as("commentCount"),
+                postStatus.count().as("likeCount")
         )).fetch();
 
         return Optional.ofNullable(dtoList.size()>0?dtoList.get(0):null);

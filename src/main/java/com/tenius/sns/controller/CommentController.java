@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/posts/{pno}/comments")
@@ -23,14 +24,14 @@ public class CommentController {
     @ApiOperation("특정 게시글 댓글 목록 조회")
     @GetMapping("")
     public ResponseEntity<PageResponseDTO> list(@PathVariable Long pno, @Valid PageRequestDTO pageRequestDTO){
-        PageResponseDTO<CommentDTO> pageResponseDTO=commentService.readPage(pno, pageRequestDTO);
+        PageResponseDTO<CommentWithCountDTO> pageResponseDTO=commentService.readPage(pno, pageRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
 
     @ApiOperation("특정 댓글 조회")
     @GetMapping("/{cno}")
-    public ResponseEntity<CommentDTO> read(@PathVariable Long pno, @PathVariable Long cno){
-        CommentDTO result=commentService.readOne(cno);
+    public ResponseEntity<CommentWithCountDTO> read(@PathVariable Long pno, @PathVariable Long cno){
+        CommentWithCountDTO result=commentService.readOne(cno);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
