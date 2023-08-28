@@ -4,7 +4,7 @@ import com.tenius.sns.security.UserDetailsServiceImpl;
 import com.tenius.sns.security.filter.LoginFilter;
 import com.tenius.sns.security.filter.TokenCheckFilter;
 import com.tenius.sns.security.handler.LoginSuccessHandler;
-import com.tenius.sns.security.handler.LogoutSuccessHandlerImpl;
+import com.tenius.sns.service.AuthService;
 import com.tenius.sns.service.UserInfoService;
 import com.tenius.sns.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -35,14 +34,12 @@ import java.util.Arrays;
 @EnableGlobalMethodSecurity(prePostEnabled=true)
 @RequiredArgsConstructor
 public class CustomSecurityConfig {
-    private final UserDetailsServiceImpl userDetailsService;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
     private final UserInfoService userInfoService;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
@@ -71,15 +68,9 @@ public class CustomSecurityConfig {
         //AuthenticationManager 설정
         AuthenticationManagerBuilder authManagerBuilder=http.getSharedObject(AuthenticationManagerBuilder.class);
         authManagerBuilder.userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
+                .passwordEncoder(passwordEncoder);
         AuthenticationManager authManager=authManagerBuilder.build();
         http.authenticationManager(authManager);
-
-        //Logout 설정
-        LogoutSuccessHandlerImpl logoutSuccessHandler=new LogoutSuccessHandlerImpl();
-        http.logout().logoutUrl("/api/auth/logout")
-                .deleteCookies(jwtUtil.ACCESS_TOKEN, jwtUtil.REFRESH_TOKEN)
-                .logoutSuccessHandler(logoutSuccessHandler);
 
 
         //LoginFilter 설정
@@ -93,14 +84,12 @@ public class CustomSecurityConfig {
 
 
         //TokenCheckFilter 설정
-        TokenCheckFilter tokenCheckFilter=new TokenCheckFilter(jwtUtil, userDetailsService);
+        TokenCheckFilter tokenCheckFilter=new TokenCheckFilter(jwtUtil, authService, userDetailsService);
         http.addFilterBefore(tokenCheckFilter, UsernamePasswordAuthenticationFilter.class);
 
 
         //CORS 처리
-        http.cors(httpSecurityCorsConfigurer->{
-            httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());
-        });
+        http.cors(httpSecurityCorsConfigurer-> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()));
 
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

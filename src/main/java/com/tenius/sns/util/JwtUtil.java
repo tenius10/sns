@@ -1,7 +1,7 @@
 package com.tenius.sns.util;
 
 import com.tenius.sns.exception.TokenException;
-import lombok.extern.log4j.Log4j2;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -20,16 +20,16 @@ import javax.servlet.http.HttpServletRequest;
 
 
 @Component
-@Log4j2
+@RequiredArgsConstructor
 public class JwtUtil {
     public final String ACCESS_TOKEN="access-token";
     public final String REFRESH_TOKEN="refresh-token";
+    public final String TOKEN_BLACKLIST_REASON="logout";
     public final long REFRESH_TOKEN_REISSUE_MS=1000*60*60*24*7;  //7일
-
+    private final int ACCESS_TOKEN_EXPIRATION_SEC=60*30;  //30분
+    private final int REFRESH_TOKEN_EXPIRATION_SEC=60*60*24*14;  //14일
     @Value("${com.tenius.jwt.secret}")
     private String jwtSecret;
-    private final int ACCESS_TOKEN_EXPIRATION_SEC=60*10;  //10분
-    private final int REFRESH_TOKEN_EXPIRATION_SEC=60*60*24*10;  //10일
 
     public String getAccessTokenFromCookies(HttpServletRequest request) {
         return getTokenFromCookies(request, ACCESS_TOKEN);
@@ -94,10 +94,10 @@ public class JwtUtil {
     }
 
     /**
-     * JWT 검증 함수
-     * @param token 토큰 문자열
-     * @return 토큰의 페이로드
-     * @throws JwtException
+     * 토큰 검증 함수
+     * @param token 토큰
+     * @return 검증 결과
+     * @throws TokenException
      */
     public boolean validateToken(String token) throws TokenException {
         try {

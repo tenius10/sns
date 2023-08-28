@@ -12,18 +12,19 @@ import java.util.Date;
 import java.util.Map;
 
 public class TokenException extends RuntimeException {
-    TOKEN_ERROR tokenError;
+    private final TOKEN_ERROR tokenError;
 
     @Getter
     public enum TOKEN_ERROR{
-        UNACCEPT(HttpStatus.UNAUTHORIZED,"Token is null or too short"),
-        MALFORM(HttpStatus.UNAUTHORIZED,"Invalid Token"),
+        UNACCEPT(HttpStatus.UNAUTHORIZED, "Token is null or too short"),
+        MALFORM(HttpStatus.UNAUTHORIZED, "Invalid Token"),
         EXPIRED(HttpStatus.UNAUTHORIZED, "Expired Token"),
         BADSIGN(HttpStatus.FORBIDDEN, "Bad Signatured Token"),
-        UNSUPPORTED(HttpStatus.FORBIDDEN,"Unsupported Token");
+        UNSUPPORTED(HttpStatus.FORBIDDEN, "Unsupported Token"),
+        BLACKLISTED(HttpStatus.FORBIDDEN, "Token is blacklisted");
 
-        private HttpStatus status;
-        private String message;
+        private final HttpStatus status;
+        private final String message;
 
         TOKEN_ERROR(HttpStatus status, String message){
             this.status=status;

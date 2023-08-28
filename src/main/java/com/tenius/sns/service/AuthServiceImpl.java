@@ -5,9 +5,12 @@ import com.tenius.sns.domain.UserInfo;
 import com.tenius.sns.dto.UserInfoDTO;
 import com.tenius.sns.dto.SignUpRequestDTO;
 import com.tenius.sns.exception.InputValueException;
+import com.tenius.sns.exception.TokenException;
+import com.tenius.sns.repository.TokenBlacklistRepository;
 import com.tenius.sns.repository.UserInfoRepository;
 import com.tenius.sns.repository.UserRepository;
 
+import com.tenius.sns.util.JwtUtil;
 import com.tenius.sns.util.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -25,8 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
+    private final TokenBlacklistRepository tokenBlacklistRepository;
     private final PasswordEncoder encoder;
     private final ModelMapper modelMapper;
+    private final JwtUtil jwtUtil;
     private final Util util;
 
     @Override
@@ -55,9 +60,31 @@ public class AuthServiceImpl implements AuthService {
                 .nickname(signUpRequestDTO.getNickname())
                 .build();
 
-        user=userRepository.save(user);
+        userRepository.save(user);
         userInfo=userInfoRepository.save(userInfo);
 
         return modelMapper.map(userInfo, UserInfoDTO.class);
+    }
+
+    @Override
+    public boolean isTokenInBlacklist(String token) throws TokenException {
+        if(tokenBlacklistRepository.exists(token)){
+            throw new TokenException(TokenException.TOKEN_ERROR.BLACKLISTED);
+        }
+        return false;
+    }
+
+    /**
+     * 토큰을 블랙리스트에 등록
+     * @param token 토큰
+     * @param reason 블랙리스트 등록 이유
+     */
+    @Override
+    public void registerTokenInBlacklist(String token, String reason){
+        long expTime= jwtUtil.getExpirationFromJwtToken(token).getTime();
+        long nowTime = System.currentTimeMillis();
+        long diff = expTime - nowTime;
+
+        tokenBlacklistRepository.save(token, reason, diff);
     }
 }

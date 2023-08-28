@@ -11,11 +11,14 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -36,36 +39,71 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userInfoDTO);
     }
 
+    @ApiOperation("로그아웃")
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        //쿠키 없애기
+        Cookie[] cookies=request.getCookies();
+        if(cookies!=null){
+            for(Cookie cookie: cookies){
+                if(cookie.getName().equals(jwtUtil.ACCESS_TOKEN) || cookie.getName().equals(jwtUtil.REFRESH_TOKEN)){
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                }
+            }
+        }
+        
+        //SecurityContext 비우기
+        SecurityContextHolder.clearContext();
+
+        //토큰 블랙리스트 등록
+        String accessToken= jwtUtil.getAccessTokenFromCookies(request);
+        String refreshToken= jwtUtil.getRefreshTokenFromCookies(request);
+
+        authService.registerTokenInBlacklist(accessToken, jwtUtil.TOKEN_BLACKLIST_REASON);
+        authService.registerTokenInBlacklist(refreshToken, jwtUtil.TOKEN_BLACKLIST_REASON);
+
+        //응답 구성
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        Gson gson = new Gson();
+        ErrorResponse errorResponse=new ErrorResponse();
+        errorResponse.putItem("message","Logout Successful");
+
+        response.getWriter().write(gson.toJson(errorResponse.getResponse()));
+    }
+
     @ApiOperation("토큰 재발급")
     @PostMapping("/refresh")
-    public void refreshToken(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try{
             //Refresh Token 가져오기
-            String refreshToken= jwtUtil.getRefreshTokenFromCookies(req);
+            String refreshToken= jwtUtil.getRefreshTokenFromCookies(request);
             if(refreshToken==null){
                 throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
             }
 
             //Refresh Token 이 유효하다면
-            if(jwtUtil.validateToken(refreshToken)){
+            if(jwtUtil.validateToken(refreshToken) && !authService.isTokenInBlacklist(refreshToken)){
                 //Refresh Token 만료까지 남은 시간 계산
                 long expTime= jwtUtil.getExpirationFromJwtToken(refreshToken).getTime();
                 long nowTime = System.currentTimeMillis();
                 long diff = expTime - nowTime;
 
                 //응답 구성
-                resp.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                resp.setStatus(HttpServletResponse.SC_OK);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.setStatus(HttpServletResponse.SC_OK);
 
                 //Access Token 재발급
                 String username= jwtUtil.getUserNameFromJwtToken(refreshToken);
                 ResponseCookie accessTokenCookie= jwtUtil.getAccessTokenCookie(username);
-                resp.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
 
                 //Refresh Token 만료까지 남은 시간이 적으면, Refresh Token 도 재발급
                 if(diff < jwtUtil.REFRESH_TOKEN_REISSUE_MS){
                     ResponseCookie refreshTokenCookie= jwtUtil.getRefreshTokenCookie(username);
-                    resp.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+                    response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
                 }
 
                 //응답 본문 구성
@@ -73,12 +111,12 @@ public class AuthController {
                 ErrorResponse errorResponse=new ErrorResponse();
                 errorResponse.putItem("message", "Token Refresh Successful");
 
-                resp.getWriter().write(gson.toJson(errorResponse.getResponse()));
+                response.getWriter().write(gson.toJson(errorResponse.getResponse()));
             }
         }
         catch(TokenException e){
             log.error("TokenException: "+e.getMessage());
-            e.sendResponseError(resp);
+            e.sendResponseError(response);
         }
     }
 }
