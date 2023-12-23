@@ -44,16 +44,9 @@ public class AuthController {
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         //쿠키 없애기
-        Cookie[] cookies=request.getCookies();
-        if(cookies!=null){
-            for(Cookie cookie: cookies){
-                if(cookie.getName().equals(jwtUtil.ACCESS_TOKEN) || cookie.getName().equals(jwtUtil.REFRESH_TOKEN)){
-                    cookie.setMaxAge(0);
-                    response.addCookie(cookie);
-                }
-            }
-        }
-        
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtUtil.getClearAccessTokenCookie().toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtUtil.getClearRefreshTokenCookie().toString());
+
         //SecurityContext 비우기
         SecurityContextHolder.clearContext();
 
@@ -80,6 +73,7 @@ public class AuthController {
         try{
             //Refresh Token 가져오기
             String refreshToken= jwtUtil.getRefreshTokenFromCookies(request);
+
             if(refreshToken==null){
                 throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
             }

@@ -2,7 +2,7 @@ package com.tenius.sns.service;
 
 import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.CommentDTO;
-import com.tenius.sns.dto.CommentWithCountDTO;
+import com.tenius.sns.dto.CommentWithStatusDTO;
 import com.tenius.sns.dto.PageRequestDTO;
 import com.tenius.sns.dto.PageResponseDTO;
 import com.tenius.sns.repository.CommentRepository;
@@ -40,8 +40,8 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentWithCountDTO readOne(Long cno){
-        CommentWithCountDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
+    public CommentWithStatusDTO readOne(Long cno){
+        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
         return result;
     }
 
@@ -60,8 +60,8 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public PageResponseDTO<CommentWithCountDTO> readPage(Long pno, PageRequestDTO pageRequestDTO){
-        PageResponseDTO<CommentWithCountDTO> result=commentRepository.search(pno, pageRequestDTO);
+    public PageResponseDTO<CommentWithStatusDTO> readPage(Long pno, PageRequestDTO pageRequestDTO){
+        PageResponseDTO<CommentWithStatusDTO> result=commentRepository.search(pno, pageRequestDTO);
         return result;
     }
 
@@ -72,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentWithCountDTO like(Long cno, String uid){
+    public CommentWithStatusDTO like(Long cno, String uid){
         CommentStatusKey key=CommentStatusKey.builder().cno(cno).uid(uid).build();
         Optional<CommentStatus> optional=commentStatusRepository.findById(key);
 
@@ -85,12 +85,12 @@ public class CommentServiceImpl implements CommentService {
             commentStatusRepository.saveWithCheck(commentStatus);
         }
 
-        CommentWithCountDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
+        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
         return result;
     }
 
     @Override
-    public CommentWithCountDTO unlike(Long cno, String uid){
+    public CommentWithStatusDTO unlike(Long cno, String uid){
         CommentStatusKey key=CommentStatusKey.builder().cno(cno).uid(uid).build();
         Optional<CommentStatus> optional=commentStatusRepository.findById(key);
 
@@ -101,7 +101,7 @@ public class CommentServiceImpl implements CommentService {
             commentStatusRepository.saveWithCheck(commentStatus);
         }
 
-        CommentWithCountDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
+        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
         return result;
     }
 }

@@ -25,15 +25,26 @@ public class PostController {
 
     @ApiOperation("게시글 목록 조회")
     @GetMapping("")
-    public ResponseEntity<PageResponseDTO> list(@Valid PageRequestDTO pageRequestDTO){
-        PageResponseDTO<PostWithCountDTO> pageResponseDTO=postService.readPage(pageRequestDTO);
+    public ResponseEntity<PageResponseDTO> list(PageRequestDTO pageRequestDTO){
+        if(pageRequestDTO.getNo()!=null){
+            PostDTO cursor=postService.readOne(pageRequestDTO.getNo());
+            pageRequestDTO.setCursor(cursor);
+        }
+
+        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String uid =((UserDetailsImpl)principal).getUid();
+
+        PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO, uid);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
 
     @ApiOperation("게시글 조회")
     @GetMapping("/{pno}")
     public ResponseEntity<PostCommentPageDTO> read(@PathVariable Long pno){
-        PostCommentPageDTO result=postService.view(pno);
+        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String uid =((UserDetailsImpl)principal).getUid();
+
+        PostCommentPageDTO result=postService.view(pno, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -48,15 +59,17 @@ public class PostController {
     }
 
     @ApiOperation("게시글 수정")
-    @PreAuthorize("@postServiceImpl.isPostWriter(#pno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
+    @PreAuthorize("@postServiceImpl.isPostWriter(#pno, principal.getUid())")
     @PutMapping(value="/{pno}", consumes=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostDTO> update(@PathVariable Long pno, @Valid @RequestBody PostDTO postDTO){
-        PostDTO result=postService.modify(pno, postDTO);
+        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String uid =((UserDetailsImpl)principal).getUid();
+        PostDTO result=postService.modify(pno, postDTO, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @ApiOperation("게시글 삭제")
-    @PreAuthorize("@postServiceImpl.isPostWriter(#pno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
+    @PreAuthorize("@postServiceImpl.isPostWriter(#pno, principal.getUid())")
     @DeleteMapping("/{pno}")
     public ResponseEntity<Void> delete(@PathVariable Long pno){
         postService.remove(pno);
@@ -64,22 +77,22 @@ public class PostController {
     }
 
     @ApiOperation("게시글 좋아요")
-    @PreAuthorize("isAuthenticated() and !@postServiceImpl.isPostWriter(#pno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
+    @PreAuthorize("isAuthenticated() and !@postServiceImpl.isPostWriter(#pno, principal.getUid())")
     @PostMapping("/{pno}/like")
-    public ResponseEntity<PostDTO> like(@PathVariable Long pno){
+    public ResponseEntity<PostWithStatusDTO> like(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
-        PostDTO result=postService.like(pno, userDetails.getUid());
+        String uid =((UserDetailsImpl)principal).getUid();
+        PostWithStatusDTO result=postService.like(pno, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @ApiOperation("게시글 좋아요 취소")
-    @PreAuthorize("isAuthenticated() and !@postServiceImpl.isPostWriter(#pno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
+    @PreAuthorize("isAuthenticated() and !@postServiceImpl.isPostWriter(#pno, principal.getUid())")
     @DeleteMapping("/{pno}/like")
-    public ResponseEntity<PostDTO> unlike(@PathVariable Long pno){
+    public ResponseEntity<PostWithStatusDTO> unlike(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
-        PostDTO result=postService.unlike(pno, userDetails.getUid());
+        String uid =((UserDetailsImpl)principal).getUid();
+        PostWithStatusDTO result=postService.unlike(pno, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

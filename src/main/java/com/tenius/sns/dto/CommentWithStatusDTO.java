@@ -9,11 +9,11 @@ import javax.validation.constraints.*;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class CommentWithCountDTO extends CommentDTO {
+public class CommentWithStatusDTO extends CommentDTO {
     @Min(0)
     private Long likeCount;
 
-    public CommentWithCountDTO(CommentWithCountDTO copy){
+    public CommentWithStatusDTO(CommentWithStatusDTO copy){
         super(copy);
         this.likeCount=copy.likeCount;
     }

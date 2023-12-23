@@ -23,15 +23,19 @@ public class CommentController {
 
     @ApiOperation("특정 게시글 댓글 목록 조회")
     @GetMapping("")
-    public ResponseEntity<PageResponseDTO> list(@PathVariable Long pno, @Valid PageRequestDTO pageRequestDTO){
-        PageResponseDTO<CommentWithCountDTO> pageResponseDTO=commentService.readPage(pno, pageRequestDTO);
+    public ResponseEntity<PageResponseDTO> list(@PathVariable Long pno, PageRequestDTO pageRequestDTO){
+        if(pageRequestDTO.getNo()!=null){
+            CommentDTO cursor=commentService.readOne(pageRequestDTO.getNo());
+            pageRequestDTO.setCursor(cursor);
+        }
+        PageResponseDTO<CommentWithStatusDTO> pageResponseDTO=commentService.readPage(pno, pageRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
 
     @ApiOperation("특정 댓글 조회")
     @GetMapping("/{cno}")
-    public ResponseEntity<CommentWithCountDTO> read(@PathVariable Long pno, @PathVariable Long cno){
-        CommentWithCountDTO result=commentService.readOne(cno);
+    public ResponseEntity<CommentWithStatusDTO> read(@PathVariable Long pno, @PathVariable Long cno){
+        CommentWithStatusDTO result=commentService.readOne(cno);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -46,7 +50,7 @@ public class CommentController {
     }
 
     @ApiOperation("특정 댓글 수정")
-    @PreAuthorize("@commentServiceImpl.isCommentWriter(#cno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
+    @PreAuthorize("@commentServiceImpl.isCommentWriter(#cno, principal.getUid())")
     @PutMapping(value="/{cno}", consumes=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommentDTO> update(@PathVariable Long pno, @PathVariable Long cno, @Valid @RequestBody CommentDTO commentDTO){
         CommentDTO result=commentService.modify(cno, commentDTO);
@@ -54,7 +58,7 @@ public class CommentController {
     }
 
     @ApiOperation("특정 댓글 삭제")
-    @PreAuthorize("@commentServiceImpl.isCommentWriter(#cno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
+    @PreAuthorize("@commentServiceImpl.isCommentWriter(#cno, principal.getUid())")
     @DeleteMapping("/{cno}")
     public ResponseEntity<Void> delete(@PathVariable Long pno, @PathVariable Long cno){
         commentService.remove(cno);
@@ -62,7 +66,7 @@ public class CommentController {
     }
 
     @ApiOperation("특정 댓글 좋아요")
-    @PreAuthorize("isAuthenticated() and !@commentServiceImpl.isCommentWriter(#cno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
+    @PreAuthorize("isAuthenticated() and !@commentServiceImpl.isCommentWriter(#cno, principal.getUid())")
     @PostMapping("/{cno}/like")
     public ResponseEntity<CommentDTO> like(@PathVariable Long pno, @PathVariable Long cno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -72,7 +76,7 @@ public class CommentController {
     }
 
     @ApiOperation("특정 댓글 좋아요 취소")
-    @PreAuthorize("isAuthenticated() and !@commentServiceImpl.isCommentWriter(#cno, @userDetailsServiceImpl.getUidFromPrincipal(principal))")
+    @PreAuthorize("isAuthenticated() and !@commentServiceImpl.isCommentWriter(#cno, principal.getUid())")
     @DeleteMapping("/{cno}/like")
     public ResponseEntity<CommentDTO> unlike(@PathVariable Long pno, @PathVariable Long cno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();

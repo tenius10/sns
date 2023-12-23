@@ -1,6 +1,6 @@
 package com.tenius.sns.repository;
 
-import com.tenius.sns.dto.CommentWithCountDTO;
+import com.tenius.sns.dto.CommentWithStatusDTO;
 import com.tenius.sns.dto.PageRequestDTO;
 import com.tenius.sns.dto.PageResponseDTO;
 import lombok.extern.log4j.Log4j2;
@@ -18,7 +18,7 @@ public class CommentRepositoryTests {
     public void testPagingByCursor(){
         Long pno=104L;
         PageRequestDTO pageRequestDTO= PageRequestDTO.builder().build();
-        PageResponseDTO<CommentWithCountDTO> result=commentRepository.search(pno, pageRequestDTO);
+        PageResponseDTO<CommentWithStatusDTO> result=commentRepository.search(pno, pageRequestDTO);
         log.info("다음 페이지 존재 여부: "+result.isHasNext());
         result.getContent().forEach(commentDTO->log.info(commentDTO));
     }

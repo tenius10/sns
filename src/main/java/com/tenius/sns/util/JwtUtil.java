@@ -12,8 +12,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.io.Decoders;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -22,14 +22,15 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    public final String ACCESS_TOKEN="access-token";
-    public final String REFRESH_TOKEN="refresh-token";
+    private final String ACCESS_TOKEN="access-token";
+    private final String REFRESH_TOKEN="refresh-token";
     public final String TOKEN_BLACKLIST_REASON="logout";
     public final long REFRESH_TOKEN_REISSUE_MS=1000*60*60*24*7;  //7일
     private final int ACCESS_TOKEN_EXPIRATION_SEC=60*30;  //30분
-    private final int REFRESH_TOKEN_EXPIRATION_SEC=60*60*24*14;  //14일
+    private final int REFRESH_TOKEN_EXPIRATION_SEC=60*60*24*10;  //10일
     @Value("${com.tenius.jwt.secret}")
     private String jwtSecret;
+
 
     public String getAccessTokenFromCookies(HttpServletRequest request) {
         return getTokenFromCookies(request, ACCESS_TOKEN);
@@ -62,6 +63,14 @@ public class JwtUtil {
                 .httpOnly(true)
                 .build();
     }
+
+    public ResponseCookie getClearAccessTokenCookie(){
+        return getClearTokenCookie(ACCESS_TOKEN);
+    }
+    public ResponseCookie getClearRefreshTokenCookie(){
+        return getClearTokenCookie(REFRESH_TOKEN);
+    }
+
 
     /**
      * 토큰 문자열에서 username을 추출하는 함수
@@ -128,6 +137,14 @@ public class JwtUtil {
             }
         }
         return token;
+    }
+
+    public ResponseCookie getClearTokenCookie(String cookieName){
+        return ResponseCookie.from(cookieName, null)
+                .path("/")
+                .maxAge(0)
+                .httpOnly(true)
+                .build();
     }
 
     private Key key() {

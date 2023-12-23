@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDTO {
+public class CommentDTO implements CursorDTO {
     private Long cno;
     @NotBlank
     @Size(max=100)

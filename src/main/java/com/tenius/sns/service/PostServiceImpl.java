@@ -38,28 +38,30 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostCommentPageDTO readOne(Long pno) {
-        PostWithCountDTO postCommentCountDTO=postRepository.findByIdWithAll(pno).orElseThrow();
-        PageResponseDTO<CommentWithCountDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
-        return new PostCommentPageDTO(postCommentCountDTO, commentPage);
+    public PostDTO readOne(Long pno) {
+        Post result=postRepository.findById(pno).orElseThrow();
+        return modelMapper.map(result, PostDTO.class);
     }
 
     @Override
-    public PostCommentPageDTO view(Long pno){
+    public PostCommentPageDTO view(Long pno, String uid){
         Post post=postRepository.findById(pno).orElseThrow();
         postRepository.save(new Post(post, post.getViews()+1));
 
-        PostWithCountDTO postCommentCountDTO=postRepository.findByIdWithAll(pno).orElseThrow();
-        PageResponseDTO<CommentWithCountDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
+        PostWithStatusDTO postCommentCountDTO=postRepository.findByIdWithAll(pno, uid).orElseThrow();
+        PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
         return new PostCommentPageDTO(postCommentCountDTO, commentPage);
     }
 
     @Override
-    public PostDTO modify(Long pno, PostDTO postDTO) {
+    public PostCommentPageDTO modify(Long pno, PostDTO postDTO, String uid) {
         Post post=postRepository.findById(pno).orElseThrow();
         post=new Post(post, postDTO.getContent());
-        Post result=postRepository.save(post);
-        return modelMapper.map(result, PostDTO.class);
+        postRepository.save(post);
+
+        PostWithStatusDTO postCommentCountDTO=postRepository.findByIdWithAll(pno, uid).orElseThrow();
+        PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
+        return new PostCommentPageDTO(postCommentCountDTO, commentPage);
     }
 
     @Override
@@ -68,8 +70,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PageResponseDTO<PostWithCountDTO> readPage(PageRequestDTO pageRequestDTO) {
-        PageResponseDTO<PostWithCountDTO> result=postRepository.search(pageRequestDTO);
+    public PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String uid) {
+        PageResponseDTO<PostWithStatusDTO> result=postRepository.search(pageRequestDTO, uid);
         return result;
     }
 
@@ -80,7 +82,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostWithCountDTO like(Long pno, String uid){
+    public PostWithStatusDTO like(Long pno, String uid){
         PostStatusKey key=PostStatusKey.builder().pno(pno).uid(uid).build();
         Optional<PostStatus> optional=postStatusRepository.findById(key);
 
@@ -93,12 +95,12 @@ public class PostServiceImpl implements PostService {
             postStatusRepository.saveWithCheck(postStatus);
         }
 
-        PostWithCountDTO result=postRepository.findByIdWithAll(pno).orElseThrow();
+        PostWithStatusDTO result=postRepository.findByIdWithAll(pno, uid).orElseThrow();
         return result;
     }
 
     @Override
-    public PostWithCountDTO unlike(Long pno, String uid){
+    public PostWithStatusDTO unlike(Long pno, String uid){
         PostStatusKey key=PostStatusKey.builder().pno(pno).uid(uid).build();
         Optional<PostStatus> optional=postStatusRepository.findById(key);
 
@@ -109,7 +111,7 @@ public class PostServiceImpl implements PostService {
             postStatusRepository.saveWithCheck(postStatus);
         }
 
-        PostWithCountDTO result=postRepository.findByIdWithAll(pno).orElseThrow();
+        PostWithStatusDTO result=postRepository.findByIdWithAll(pno, uid).orElseThrow();
         return result;
     }
 }

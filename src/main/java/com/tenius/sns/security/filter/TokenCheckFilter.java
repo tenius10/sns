@@ -32,8 +32,8 @@ public class TokenCheckFilter extends OncePerRequestFilter {
         try{
             String accessToken= jwtUtil.getAccessTokenFromCookies(request);
 
-            if(accessToken!=null && jwtUtil.validateToken(accessToken)){
-                if(!authService.isTokenInBlacklist(accessToken)){
+            if(accessToken!=null){
+                if(jwtUtil.validateToken(accessToken) && !authService.isTokenInBlacklist(accessToken)){
                     String username= jwtUtil.getUserNameFromJwtToken(accessToken);
                     UserDetails userDetails=userDetailsService.loadUserByUsername(username);
 

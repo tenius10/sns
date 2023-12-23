@@ -15,9 +15,9 @@ public class PostServiceTests {
 
     @Test
     public void testRegister(){
-        String uid="ZEUkANTjpFsEt7Zy";
+        String uid="qGHLR09TjftDJKCA";
         PostDTO postDTO=PostDTO.builder()
-                .content("게시글 2")
+                .content("서비스 등록 테스트")
                 .views(0)
                 .build();
         PostDTO result=postService.register(postDTO, uid);
@@ -26,46 +26,47 @@ public class PostServiceTests {
     @Test
     public void testReadOne(){
         Long pno=1L;
-        PostCommentPageDTO result=postService.readOne(pno);
+        PostDTO result=postService.readOne(pno);
         log.info(result);
-        result.getCommentPage().getContent().forEach(commentDTO -> log.info(commentDTO));
     }
     @Test
     public void testView(){
-        Long pno=1L;
-        PostCommentPageDTO result=postService.view(pno);
+        Long pno=29L;
+        String uid="qGHLR09TjftDJKCA";
+        PostCommentPageDTO result=postService.view(pno, uid);
         log.info(result);
         result.getCommentPage().getContent().forEach(commentDTO -> log.info(commentDTO));
     }
     @Test
     public void testModify(){
-        Long pno=1L;
+        Long pno=2L;
+        String uid="qGHLR09TjftDJKCA";
         PostDTO postDTO=PostDTO.builder()
                 .content("서비스 수정 테스트")
                 .build();
-        PostDTO result=postService.modify(pno, postDTO);
+        PostDTO result=postService.modify(pno, postDTO, uid);
         log.info(result);
     }
     @Test
     public void testRemove(){
-        Long pno=1L;
+        Long pno=2L;
         postService.remove(pno);
     }
     @Test
     public void testPagingByCursor(){
+        String uid="qGHLR09TjftDJKCA";
         PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
-        PageResponseDTO<PostWithCountDTO> result=postService.readPage(pageRequestDTO);
+        PageResponseDTO<PostWithStatusDTO> result=postService.readPage(pageRequestDTO, uid);
 
         log.info(pageRequestDTO);
         result.getContent().forEach(postCommentCountDTO->log.info(postCommentCountDTO));
-        log.info("커서: "+result.getCursor());
         log.info("다음 페이지 존재 여부: "+result.isHasNext());
     }
 
     @Test
     public void testLike(){
-        Long pno=2L;
-        String uid="ZEUkANTjpFsEt7Zy";
+        Long pno=29L;
+        String uid="gMG0QaNvumF4MMpI";
         PostDTO result=postService.like(pno,uid);
         log.info(result);
     }

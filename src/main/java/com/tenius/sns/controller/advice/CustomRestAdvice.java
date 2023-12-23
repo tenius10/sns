@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Map;
+import java.util.NoSuchElementException;
+
 
 @Log4j2
 @RestControllerAdvice
@@ -68,6 +70,7 @@ public class CustomRestAdvice {
      * @return ResponseEntity (404)
      */
     @ExceptionHandler({
+            NoSuchElementException.class,
             EntityNotFoundException.class,
             EmptyResultDataAccessException.class
     })

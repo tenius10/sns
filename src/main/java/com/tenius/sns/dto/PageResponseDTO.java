@@ -14,13 +14,4 @@ import java.util.List;
 public class PageResponseDTO<T> {
     private List<T> content;
     private boolean hasNext;
-    private T cursor;
-
-    public static class PageResponseDTOBuilder<T> {
-        public PageResponseDTOBuilder content(List<T> content){
-            this.content=content;
-            if(content.size()>0) this.cursor=content.get(content.size()-1);
-            return this;
-        }
-    }
 }

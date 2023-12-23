@@ -14,10 +14,10 @@ public class CommentServiceTests {
 
     @Test
     public void testRegister(){
-        String uid="ZEUkANTjpFsEt7Zy";
-        Long pno=3L;
+        String uid="qGHLR09TjftDJKCA";
+        Long pno=29L;
         CommentDTO commentDTO=CommentDTO.builder()
-                .content("게시글 2> 댓글 2")
+                .content("하... 화귀는 진짜 레전드야...")
                 .build();
         CommentDTO result=commentService.register(commentDTO, pno, uid);
         log.info(result);

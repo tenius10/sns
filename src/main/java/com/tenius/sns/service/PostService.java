@@ -5,12 +5,12 @@ import com.tenius.sns.dto.*;
 
 public interface PostService {
     PostDTO register (PostDTO postDTO, String uid);
-    PostCommentPageDTO readOne(Long pno);
-    PostCommentPageDTO view(Long pno);
-    PostDTO modify(Long pno, PostDTO postDTO);
+    PostDTO readOne(Long pno);
+    PostCommentPageDTO view(Long pno, String uid);
+    PostCommentPageDTO modify(Long pno, PostDTO postDTO, String uid);
     void remove(Long pno);
-    PageResponseDTO<PostWithCountDTO> readPage(PageRequestDTO pageRequestDTO);
+    PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String uid);
     boolean isPostWriter(Long pno, String uid);
-    PostWithCountDTO like(Long pno, String uid);
-    PostWithCountDTO unlike(Long pno, String uid);
+    PostWithStatusDTO like(Long pno, String uid);
+    PostWithStatusDTO unlike(Long pno, String uid);
 }

@@ -16,10 +16,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PageRequestDTO {
     @Builder.Default
-    private Pageable pageable= PageRequest.of(0, 10, Sort.by("regDate").descending());;
+    private int size=10;
+    private Long no;  //cursor 의 식별자가 Long 인 경우
+    private String id;  //cursor 의 식별자가 String 인 경우
     private CursorDTO cursor;
 
-    public LocalDateTime getPivot(){
-        return cursor==null? null : cursor.getRegDate();
+    public Pageable getPageable(){
+        return PageRequest.of(0, size, Sort.by("regDate").descending());
     }
 }

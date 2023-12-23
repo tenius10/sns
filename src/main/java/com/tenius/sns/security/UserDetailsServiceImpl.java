@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -22,15 +21,5 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user=userRepository.findByUsername(username)
                 .orElseThrow(()->new UsernameNotFoundException("User Not Found with username: " + username));
         return UserDetailsImpl.build(user);
-    }
-
-    /**
-     * Principal에서 Uid를 추출하는 함수
-     * (@PreAuthorize에서 Principal을 UserDetailsImpl로 형변환할 수 없어서 함수로 분리)
-     * @param principal
-     * @return uid
-     */
-    public String getUidFromPrincipal(Principal principal){
-        return ((UserDetailsImpl)principal).getUid();
     }
 }

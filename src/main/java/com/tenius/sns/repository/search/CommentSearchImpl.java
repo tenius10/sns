@@ -17,10 +17,11 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
         super(Comment.class);
     }
     @Override
-    public PageResponseDTO<CommentWithCountDTO> search(Long pno, PageRequestDTO pageRequestDTO){
+    public PageResponseDTO<CommentWithStatusDTO> search(Long pno, PageRequestDTO pageRequestDTO){
         Pageable pageable=pageRequestDTO.getPageable();
         pageable= PageRequest.of(0, pageable.getPageSize()+1, pageable.getSort());
-        LocalDateTime pivot=pageRequestDTO.getPivot();
+        LocalDateTime pivot=pageRequestDTO.getCursor()!=null?
+                pageRequestDTO.getCursor().getRegDate(): null;
 
         //Q 도메인
         QUserInfo userInfo=QUserInfo.userInfo;
@@ -50,7 +51,7 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
         //페이징 설정
         this.getQuerydsl().applyPagination(pageable, query);
 
-        List<CommentWithCountDTO> dtoList=query.select(Projections.bean(CommentWithCountDTO.class,
+        List<CommentWithStatusDTO> dtoList=query.select(Projections.bean(CommentWithStatusDTO.class,
                 comment.cno,
                 comment.content,
                 comment.post.pno.as("pno"),
@@ -70,14 +71,14 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
             hasNext=true;
         }
 
-        return PageResponseDTO.<CommentWithCountDTO>builder()
+        return PageResponseDTO.<CommentWithStatusDTO>builder()
                 .content(dtoList)
                 .hasNext(hasNext)
                 .build();
     }
 
     @Override
-    public Optional<CommentWithCountDTO> findByIdWithAll(Long cno){
+    public Optional<CommentWithStatusDTO> findByIdWithAll(Long cno){
         //Q 도메인
         QUserInfo userInfo=QUserInfo.userInfo;
         QComment comment=QComment.comment;
@@ -94,7 +95,7 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
         //where 설정
         query.where(comment.cno.eq(cno));
 
-        List<CommentWithCountDTO> dtoList=query.select(Projections.bean(CommentWithCountDTO.class,
+        List<CommentWithStatusDTO> dtoList=query.select(Projections.bean(CommentWithStatusDTO.class,
                 comment.cno,
                 comment.content,
                 comment.post.pno.as("pno"),
