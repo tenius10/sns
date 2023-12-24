@@ -16,9 +16,9 @@ public class AuthServiceTests {
     @Test
     public void testRegisterUser(){
         SignUpRequestDTO signUpRequestDTO= SignUpRequestDTO.builder()
-                .username("testuser3")
-                .password("testpassword3")
-                .nickname("밤양갱")
+                .username("testuser2")
+                .password("testpassword2")
+                .nickname("계란토스트")
                 .build();
         UserInfoDTO result=authService.registerUser(signUpRequestDTO);
         log.info(result);

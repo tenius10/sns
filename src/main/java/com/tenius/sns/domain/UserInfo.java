@@ -1,6 +1,8 @@
 package com.tenius.sns.domain;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -19,4 +21,8 @@ public class UserInfo extends BaseEntity {
     private String uid;
     @Column(length=10)
     private String nickname;
+    @JoinColumn(name="uid", insertable = false, updatable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @OnDelete(action= OnDeleteAction.CASCADE)
+    private User user;
 }

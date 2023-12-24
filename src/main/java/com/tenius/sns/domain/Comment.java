@@ -1,6 +1,8 @@
 package com.tenius.sns.domain;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -20,8 +22,10 @@ public class Comment extends BaseEntity {
     private Long cno;
     private String content;
     @ManyToOne(fetch= FetchType.LAZY)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private UserInfo writer;
     @ManyToOne(fetch= FetchType.LAZY)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Post post;
 
     public Comment(Comment copy){

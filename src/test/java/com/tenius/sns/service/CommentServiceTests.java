@@ -14,10 +14,10 @@ public class CommentServiceTests {
 
     @Test
     public void testRegister(){
-        String uid="qGHLR09TjftDJKCA";
-        Long pno=29L;
+        String uid="x3SzQoEkSRwDnspp";
+        Long pno=1L;
         CommentDTO commentDTO=CommentDTO.builder()
-                .content("하... 화귀는 진짜 레전드야...")
+                .content("서비스 댓글 등록 테스트")
                 .build();
         CommentDTO result=commentService.register(commentDTO, pno, uid);
         log.info(result);
@@ -43,15 +43,15 @@ public class CommentServiceTests {
 
     @Test
     public void testLike(){
-        Long cno=7L;
-        String uid="UFPJ1P71lyJM8xNA";
+        Long cno=1L;
+        String uid="Lt2T09Awufed3wop";
         CommentDTO result=commentService.like(cno,uid);
         log.info(result);
     }
     @Test
     public void testUnlike(){
-        Long cno=2L;
-        String uid="bgzY3mS0KbElSTub";
+        Long cno=1L;
+        String uid="FEk9MRBg67YpClpU";
         CommentDTO result=commentService.unlike(cno,uid);
         log.info(result);
     }

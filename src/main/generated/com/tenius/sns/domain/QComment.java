@@ -57,7 +57,7 @@ public class QComment extends EntityPathBase<Comment> {
     public QComment(Class<? extends Comment> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.post = inits.isInitialized("post") ? new QPost(forProperty("post"), inits.get("post")) : null;
-        this.writer = inits.isInitialized("writer") ? new QUserInfo(forProperty("writer")) : null;
+        this.writer = inits.isInitialized("writer") ? new QUserInfo(forProperty("writer"), inits.get("writer")) : null;
     }
 
 }

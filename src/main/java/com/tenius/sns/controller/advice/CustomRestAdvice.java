@@ -2,6 +2,7 @@ package com.tenius.sns.controller.advice;
 
 import com.tenius.sns.dto.ErrorResponse;
 import com.tenius.sns.exception.InputValueException;
+import com.tenius.sns.exception.TokenException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -91,4 +92,12 @@ public class CustomRestAdvice {
         errorResponse.putItem("message", e.getMessage());
         return ResponseEntity.status(e.getStatus()).body(errorResponse.getResponse());
     }
+
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<Map<String, Object>> handleInputValueException(TokenException e){
+        ErrorResponse errorResponse=new ErrorResponse();
+        errorResponse.putItem("message", e.getMessage());
+        return ResponseEntity.status(e.getStatus()).body(errorResponse.getResponse());
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.tenius.sns.controller;
 
 import com.tenius.sns.dto.*;
+import com.tenius.sns.exception.TokenException;
 import com.tenius.sns.security.UserDetailsImpl;
 import com.tenius.sns.service.CommentService;
 import io.swagger.annotations.ApiOperation;
@@ -45,6 +46,9 @@ public class CommentController {
     public ResponseEntity<CommentDTO> create(@PathVariable Long pno, @Valid @RequestBody CommentDTO commentDTO){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserDetailsImpl userDetails = (UserDetailsImpl) principal;
+        if(userDetails==null){
+            throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
+        }
         CommentDTO result=commentService.register(commentDTO, pno, userDetails.getUid());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
@@ -71,6 +75,9 @@ public class CommentController {
     public ResponseEntity<CommentDTO> like(@PathVariable Long pno, @PathVariable Long cno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserDetailsImpl userDetails=(UserDetailsImpl)principal;
+        if(userDetails==null){
+            throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
+        }
         CommentDTO result=commentService.like(cno, userDetails.getUid());
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
@@ -81,6 +88,9 @@ public class CommentController {
     public ResponseEntity<CommentDTO> unlike(@PathVariable Long pno, @PathVariable Long cno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserDetailsImpl userDetails=(UserDetailsImpl)principal;
+        if(userDetails==null){
+            throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
+        }
         CommentDTO result=commentService.unlike(cno, userDetails.getUid());
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }

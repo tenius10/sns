@@ -1,6 +1,8 @@
 package com.tenius.sns.domain;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -21,6 +23,7 @@ public class Post extends BaseEntity {
     private String content;
     private int views;
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action= OnDeleteAction.CASCADE)
     private UserInfo writer;
 
     public Post(Post copy){

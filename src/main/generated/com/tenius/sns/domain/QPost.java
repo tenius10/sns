@@ -56,7 +56,7 @@ public class QPost extends EntityPathBase<Post> {
 
     public QPost(Class<? extends Post> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.writer = inits.isInitialized("writer") ? new QUserInfo(forProperty("writer")) : null;
+        this.writer = inits.isInitialized("writer") ? new QUserInfo(forProperty("writer"), inits.get("writer")) : null;
     }
 
 }

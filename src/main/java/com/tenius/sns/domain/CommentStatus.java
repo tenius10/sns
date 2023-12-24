@@ -1,6 +1,8 @@
 package com.tenius.sns.domain;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -21,6 +23,14 @@ public class CommentStatus extends BaseEntity {
     private String uid;
     private boolean liked;
     private boolean hided;
+    @JoinColumn(name="cno", insertable = false, updatable = false)
+    @ManyToOne(fetch= FetchType.LAZY)
+    @OnDelete(action= OnDeleteAction.CASCADE)
+    private Comment comment;
+    @JoinColumn(name="uid", insertable = false, updatable = false)
+    @ManyToOne(fetch= FetchType.LAZY)
+    @OnDelete(action=OnDeleteAction.CASCADE)
+    private UserInfo user;
 
     public CommentStatus(CommentStatus copy){
         super(copy.getRegDate(), copy.getModDate());

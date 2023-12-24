@@ -3,6 +3,7 @@ package com.tenius.sns.security.handler;
 import com.google.gson.Gson;
 import com.tenius.sns.dto.ErrorResponse;
 import com.tenius.sns.dto.UserInfoDTO;
+import com.tenius.sns.exception.TokenException;
 import com.tenius.sns.security.UserDetailsImpl;
 import com.tenius.sns.service.UserInfoService;
 import com.tenius.sns.util.JwtUtil;
@@ -29,30 +30,39 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final UserInfoService userInfoService;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("Login Success Handler.........");
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        resp.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        resp.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpServletResponse.SC_OK);
 
         //Access token, Refresh token 추가
         ResponseCookie accessTokenCookie= jwtUtil.getAccessTokenCookie(authentication);
         ResponseCookie refreshTokenCookie= jwtUtil.getRefreshTokenCookie(authentication);
 
-        resp.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
-        resp.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
-        //응답 본문 구성
-        Gson gson = new Gson();
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        UserInfoDTO userInfoDTO=userInfoService.getUserInfo(userDetails.getUid());
+        try {
+            //응답 본문 구성
+            Gson gson = new Gson();
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            if(userDetails==null){
+                throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
+            }
+            UserInfoDTO userInfoDTO=userInfoService.getUserInfo(userDetails.getUid());
 
-        ErrorResponse errorResponse=new ErrorResponse();
-        errorResponse.putItem("message","Login Successful");
-        errorResponse.putItem("user", userInfoDTO);
+            ErrorResponse errorResponse=new ErrorResponse();
+            errorResponse.putItem("message","Login Successful");
+            errorResponse.putItem("user", userInfoDTO);
 
-        resp.getWriter().write(gson.toJson(errorResponse.getResponse()));
+            response.getWriter().write(gson.toJson(errorResponse.getResponse()));
+        }
+        catch(TokenException e){
+            log.error("TokenException: "+e.getMessage());
+            e.sendResponseError(response);
+        }
     }
 }

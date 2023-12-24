@@ -16,6 +16,7 @@ public class TokenException extends RuntimeException {
 
     @Getter
     public enum TOKEN_ERROR{
+        //인증 안 한 채로 요청해서 UserDetails 가 null 인 경우 UNACCEPT
         UNACCEPT(HttpStatus.UNAUTHORIZED, "Token is null or too short"),
         MALFORM(HttpStatus.UNAUTHORIZED, "Invalid Token"),
         EXPIRED(HttpStatus.UNAUTHORIZED, "Expired Token"),
@@ -35,6 +36,15 @@ public class TokenException extends RuntimeException {
     public TokenException(TOKEN_ERROR error){
         super(error.name());
         this.tokenError=error;
+    }
+
+    public HttpStatus getStatus(){
+        return tokenError.getStatus();
+    }
+
+    @Override
+    public String getMessage(){
+        return tokenError.getMessage();
     }
 
     public void sendResponseError(HttpServletResponse resp){

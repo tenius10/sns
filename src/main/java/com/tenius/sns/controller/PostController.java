@@ -1,6 +1,7 @@
 package com.tenius.sns.controller;
 
 import com.tenius.sns.dto.*;
+import com.tenius.sns.exception.TokenException;
 import com.tenius.sns.security.UserDetailsImpl;
 import com.tenius.sns.service.PostService;
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +33,8 @@ public class PostController {
         }
 
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uid =((UserDetailsImpl)principal).getUid();
+        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
+        String uid=(userDetails!=null)? userDetails.getUid():"";
 
         PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO, uid);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
@@ -42,7 +44,8 @@ public class PostController {
     @GetMapping("/{pno}")
     public ResponseEntity<PostCommentPageDTO> read(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uid =((UserDetailsImpl)principal).getUid();
+        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
+        String uid=(userDetails!=null)? userDetails.getUid():"";
 
         PostCommentPageDTO result=postService.view(pno, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
@@ -54,6 +57,9 @@ public class PostController {
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostDTO postDTO){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserDetailsImpl userDetails = (UserDetailsImpl) principal;
+        if(userDetails==null){
+            throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
+        }
         PostDTO result=postService.register(postDTO, userDetails.getUid());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
@@ -61,10 +67,13 @@ public class PostController {
     @ApiOperation("게시글 수정")
     @PreAuthorize("@postServiceImpl.isPostWriter(#pno, principal.getUid())")
     @PutMapping(value="/{pno}", consumes=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostDTO> update(@PathVariable Long pno, @Valid @RequestBody PostDTO postDTO){
+    public ResponseEntity<PostCommentPageDTO> update(@PathVariable Long pno, @Valid @RequestBody PostDTO postDTO){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uid =((UserDetailsImpl)principal).getUid();
-        PostDTO result=postService.modify(pno, postDTO, uid);
+        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
+        if(userDetails==null){
+            throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
+        }
+        PostCommentPageDTO result=postService.modify(pno, postDTO, userDetails.getUid());
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -81,8 +90,11 @@ public class PostController {
     @PostMapping("/{pno}/like")
     public ResponseEntity<PostWithStatusDTO> like(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uid =((UserDetailsImpl)principal).getUid();
-        PostWithStatusDTO result=postService.like(pno, uid);
+        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
+        if(userDetails==null){
+            throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
+        }
+        PostWithStatusDTO result=postService.like(pno, userDetails.getUid());
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -91,8 +103,11 @@ public class PostController {
     @DeleteMapping("/{pno}/like")
     public ResponseEntity<PostWithStatusDTO> unlike(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uid =((UserDetailsImpl)principal).getUid();
-        PostWithStatusDTO result=postService.unlike(pno, uid);
+        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
+        if(userDetails==null){
+            throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
+        }
+        PostWithStatusDTO result=postService.unlike(pno, userDetails.getUid());
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }
