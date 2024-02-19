@@ -11,8 +11,9 @@ import lombok.*;
 public class PostCommentPageDTO extends PostWithStatusDTO implements CursorDTO {
     private PageResponseDTO<CommentWithStatusDTO> commentPage;
 
-    public PostCommentPageDTO(PostWithStatusDTO parent, PageResponseDTO<CommentWithStatusDTO> commentPage){
-        super(parent);
+    @Builder(builderMethodName = "postCommentPageDTOBuilder")
+    public PostCommentPageDTO(PostWithStatusDTO postWithStatusDTO, PageResponseDTO<CommentWithStatusDTO> commentPage){
+        super(postWithStatusDTO);
         this.commentPage=commentPage;
     }
 }

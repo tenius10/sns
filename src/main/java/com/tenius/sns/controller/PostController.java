@@ -1,12 +1,14 @@
 package com.tenius.sns.controller;
 
 import com.tenius.sns.dto.*;
+import com.tenius.sns.exception.InputValueException;
 import com.tenius.sns.exception.TokenException;
 import com.tenius.sns.security.UserDetailsImpl;
 import com.tenius.sns.service.PostService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,15 +75,25 @@ public class PostController {
         if(userDetails==null){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
-        PostCommentPageDTO result=postService.modify(pno, postDTO, userDetails.getUid());
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+        try{
+            PostCommentPageDTO result=postService.modify(pno, postDTO, userDetails.getUid());
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } catch(Exception e){
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @ApiOperation("게시글 삭제")
     @PreAuthorize("@postServiceImpl.isPostWriter(#pno, principal.getUid())")
     @DeleteMapping("/{pno}")
     public ResponseEntity<Void> delete(@PathVariable Long pno){
-        postService.remove(pno);
+        try{
+            postService.remove(pno);
+        } catch(Exception e){
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

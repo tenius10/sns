@@ -1,6 +1,7 @@
 package com.tenius.sns.repository;
 
 import com.tenius.sns.domain.Post;
+import com.tenius.sns.domain.PostImage;
 import com.tenius.sns.domain.UserInfo;
 import com.tenius.sns.dto.PageRequestDTO;
 import com.tenius.sns.dto.PageResponseDTO;
@@ -14,7 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 @Log4j2
@@ -30,9 +34,9 @@ public class PostRepositoryTests {
 
     @Test
     public void testInsert(){
-        String uid="ugFyVwlT2nqdZH6F";
+        String uid="x3SzQoEkSRwDnspp";
         UserInfo userInfo=userInfoRepository.findById(uid).orElseThrow();
-        IntStream.rangeClosed(1,100).forEach(i->{
+        IntStream.rangeClosed(1,10).forEach(i->{
             Post post=Post.builder()
                     .content("내용..."+i)
                     .writer(userInfo)
@@ -44,7 +48,7 @@ public class PostRepositoryTests {
     }
     @Test
     public void testRead(){
-        Long pno=1L;
+        Long pno=45L;
         Post result=postRepository.findById(pno).orElseThrow();
         log.info(result.getWriter().getUid());
     }
@@ -77,14 +81,37 @@ public class PostRepositoryTests {
     }
     @Test
     public void testPagingByCursor(){
-        Long pivot=10L;
+        Long pivot=67L;
         String uid="ugFyVwlT2nqdZH6F";
         Post post=postRepository.findById(pivot).orElseThrow();
-        PageRequestDTO pageRequestDTO=PageRequestDTO.builder()
-                .cursor(modelMapper.map(post, PostDTO.class))
-                .build();
-        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageRequestDTO, uid);
+        Pageable pageable=PageRequest.of(0, 10, Sort.by("regDate").descending());
+        LocalDateTime cursor=post.getRegDate();
+
+        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageable, cursor, uid);
         log.info("다음 페이지 존재 여부: "+result.isHasNext());
         result.getContent().forEach(postCommentCountDTO->log.info(postCommentCountDTO));
+    }
+    @Test
+    public void testInsertWithImages(){
+        String uid="x3SzQoEkSRwDnspp";
+        UserInfo userInfo=userInfoRepository.findById(uid).orElseThrow();
+        Post post=Post.builder()
+                .content("첨부파일 테스트")
+                .writer(userInfo)
+                .views(0)
+                .build();
+        //이미지 추가
+        for(int i=0;i<3;i++){
+            post.addImage(UUID.randomUUID().toString(), "테스트용 사진"+i+".jpg");
+        }
+        postRepository.save(post);
+    }
+    @Test
+    public void testReadWithImages(){
+        Post post=postRepository.findByIdWithImages(45L).orElseThrow();
+        log.info(post);
+        for(PostImage image:post.getImages()){
+            log.info(image);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.tenius.sns.dto;
+package com.tenius.sns.exception;
 
 import lombok.Data;
 

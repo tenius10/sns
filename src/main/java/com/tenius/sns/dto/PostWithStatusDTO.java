@@ -24,4 +24,13 @@ public class PostWithStatusDTO extends PostDTO {
         this.isOwned=copy.isOwned;
         this.isLiked=copy.isLiked;
     }
+
+    @Builder(builderMethodName = "postWithStatusDTOBuilder")
+    public PostWithStatusDTO(PostDTO postDTO, Long commentCount, Long likeCount, boolean isOwned, boolean isLiked) {
+        super(postDTO);
+        this.commentCount = commentCount;
+        this.likeCount = likeCount;
+        this.isOwned = isOwned;
+        this.isLiked = isLiked;
+    }
 }

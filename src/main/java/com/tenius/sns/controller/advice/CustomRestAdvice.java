@@ -1,6 +1,6 @@
 package com.tenius.sns.controller.advice;
 
-import com.tenius.sns.dto.ErrorResponse;
+import com.tenius.sns.exception.ErrorResponse;
 import com.tenius.sns.exception.InputValueException;
 import com.tenius.sns.exception.TokenException;
 import lombok.extern.log4j.Log4j2;
@@ -99,5 +99,4 @@ public class CustomRestAdvice {
         errorResponse.putItem("message", e.getMessage());
         return ResponseEntity.status(e.getStatus()).body(errorResponse.getResponse());
     }
-
 }

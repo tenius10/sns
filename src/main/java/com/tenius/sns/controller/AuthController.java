@@ -1,7 +1,7 @@
 package com.tenius.sns.controller;
 
 import com.google.gson.Gson;
-import com.tenius.sns.dto.ErrorResponse;
+import com.tenius.sns.exception.ErrorResponse;
 import com.tenius.sns.dto.SignUpRequestDTO;
 import com.tenius.sns.dto.UserInfoDTO;
 import com.tenius.sns.exception.TokenException;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;

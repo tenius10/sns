@@ -72,6 +72,9 @@ dependencies {
 
     //Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //Thumbnail (이미지 썸네일 생성)
+    implementation 'net.coobird:thumbnailator:0.4.16'
 }
 
 tasks.named('test') {

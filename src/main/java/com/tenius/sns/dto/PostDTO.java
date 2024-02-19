@@ -1,6 +1,8 @@
 package com.tenius.sns.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.tenius.sns.domain.Post;
+import com.tenius.sns.domain.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,7 +26,8 @@ public class PostDTO implements CursorDTO {
     private LocalDateTime regDate;
     private LocalDateTime modDate;
     @Min(0)
-    private int views;
+    private int views=0;
+    private List<String> fileNames;
 
     public PostDTO(PostDTO copy){
         this.pno=copy.pno;
@@ -32,6 +36,7 @@ public class PostDTO implements CursorDTO {
         this.regDate=copy.regDate;
         this.modDate=copy.modDate;
         this.views=copy.views;
+        this.fileNames=copy.fileNames;
     }
 
     @Override

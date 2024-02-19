@@ -1,7 +1,7 @@
 package com.tenius.sns.security.handler;
 
 import com.google.gson.Gson;
-import com.tenius.sns.dto.ErrorResponse;
+import com.tenius.sns.exception.ErrorResponse;
 import com.tenius.sns.dto.UserInfoDTO;
 import com.tenius.sns.exception.TokenException;
 import com.tenius.sns.security.UserDetailsImpl;

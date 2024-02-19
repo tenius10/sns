@@ -38,13 +38,13 @@ public class AuthServiceImpl implements AuthService {
     public UserInfoDTO registerUser(SignUpRequestDTO signUpRequestDTO){
         //아이디, 이메일, 닉네임 중복 검사
         if (userRepository.existsByUsername(signUpRequestDTO.getUsername())) {
-            throw new InputValueException(InputValueException.INPUT_VALUE_ERROR.DUPLICATE_USERNAME);
+            throw new InputValueException(InputValueException.ERROR.DUPLICATE_USERNAME);
         }
         if (signUpRequestDTO.getEmail()!=null && userRepository.existsByEmail(signUpRequestDTO.getEmail())) {
-            throw new InputValueException(InputValueException.INPUT_VALUE_ERROR.DUPLICATE_EMAIL);
+            throw new InputValueException(InputValueException.ERROR.DUPLICATE_EMAIL);
         }
         if(userInfoRepository.existsByNickname(signUpRequestDTO.getNickname())){
-            throw new InputValueException(InputValueException.INPUT_VALUE_ERROR.DUPLICATE_NICKNAME);
+            throw new InputValueException(InputValueException.ERROR.DUPLICATE_NICKNAME);
         }
 
         //유저 계정 생성
