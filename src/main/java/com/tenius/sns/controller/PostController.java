@@ -1,14 +1,12 @@
 package com.tenius.sns.controller;
 
 import com.tenius.sns.dto.*;
-import com.tenius.sns.exception.InputValueException;
 import com.tenius.sns.exception.TokenException;
 import com.tenius.sns.security.UserDetailsImpl;
 import com.tenius.sns.service.PostService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

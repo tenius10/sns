@@ -30,13 +30,13 @@ public class PostServiceTests {
     }
     @Test
     public void testReadOne(){
-        Long pno=1L;
+        Long pno=81L;
         PostDTO result=postService.readOne(pno);
         log.info(result);
     }
     @Test
     public void testView(){
-        Long pno=67L;
+        Long pno=81L;
         String uid="x3SzQoEkSRwDnspp";
         PostCommentPageDTO result=postService.view(pno, uid);
         log.info(result);
@@ -58,7 +58,7 @@ public class PostServiceTests {
     }
     @Test
     public void testRemove(){
-        Long pno=66L;
+        Long pno=81L;
         try{
             postService.remove(pno);
         } catch (Exception e){
@@ -67,7 +67,7 @@ public class PostServiceTests {
     }
     @Test
     public void testPagingByCursor(){
-        Long pivot=68L;
+        Long pivot=96L;
         String uid="x3SzQoEkSRwDnspp";
         PostDTO cursor=null;
         try{
@@ -112,14 +112,14 @@ public class PostServiceTests {
     }
     @Test
     public void testViewWithImage(){
-        Long pno=66L;
+        Long pno=94L;
         String uid="x3SzQoEkSRwDnspp";
         PostCommentPageDTO result=postService.view(pno, uid);
         log.info(result);
     }
     @Test
     public void testModifyWithImage(){
-        Long pno=66L;
+        Long pno=94L;
         String uid="x3SzQoEkSRwDnspp";
         PostDTO postDTO=PostDTO.builder()
                 .content("첨부파일 수정 (서비스 계층)")

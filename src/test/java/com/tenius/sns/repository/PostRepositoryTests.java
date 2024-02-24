@@ -1,12 +1,10 @@
 package com.tenius.sns.repository;
 
 import com.tenius.sns.domain.Post;
-import com.tenius.sns.domain.PostImage;
+import com.tenius.sns.domain.StorageFile;
 import com.tenius.sns.domain.UserInfo;
-import com.tenius.sns.dto.PageRequestDTO;
 import com.tenius.sns.dto.PageResponseDTO;
 import com.tenius.sns.dto.PostWithStatusDTO;
-import com.tenius.sns.dto.PostDTO;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -17,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -29,8 +26,6 @@ public class PostRepositoryTests {
     private PostRepository postRepository;
     @Autowired
     private UserInfoRepository userInfoRepository;
-    @Autowired
-    private ModelMapper modelMapper;
 
     @Test
     public void testInsert(){
@@ -81,8 +76,8 @@ public class PostRepositoryTests {
     }
     @Test
     public void testPagingByCursor(){
-        Long pivot=67L;
-        String uid="ugFyVwlT2nqdZH6F";
+        Long pivot=45L;
+        String uid="x3SzQoEkSRwDnspp";
         Post post=postRepository.findById(pivot).orElseThrow();
         Pageable pageable=PageRequest.of(0, 10, Sort.by("regDate").descending());
         LocalDateTime cursor=post.getRegDate();
@@ -92,7 +87,7 @@ public class PostRepositoryTests {
         result.getContent().forEach(postCommentCountDTO->log.info(postCommentCountDTO));
     }
     @Test
-    public void testInsertWithImages(){
+    public void testInsertWithFiles(){
         String uid="x3SzQoEkSRwDnspp";
         UserInfo userInfo=userInfoRepository.findById(uid).orElseThrow();
         Post post=Post.builder()
@@ -102,16 +97,17 @@ public class PostRepositoryTests {
                 .build();
         //이미지 추가
         for(int i=0;i<3;i++){
-            post.addImage(UUID.randomUUID().toString(), "테스트용 사진"+i+".jpg");
+            post.addFile(UUID.randomUUID().toString(), "테스트용 사진"+i+".jpg");
         }
         postRepository.save(post);
     }
     @Test
-    public void testReadWithImages(){
-        Post post=postRepository.findByIdWithImages(45L).orElseThrow();
+    public void testReadWithFiles(){
+        Long pno=81L;
+        Post post=postRepository.findByIdWithFiles(pno).orElseThrow();
         log.info(post);
-        for(PostImage image:post.getImages()){
-            log.info(image);
+        for(StorageFile file:post.getFiles()){
+            log.info(file);
         }
     }
 }

@@ -17,4 +17,10 @@ public class CommentWithStatusDTO extends CommentDTO {
         super(copy);
         this.likeCount=copy.likeCount;
     }
+
+    @Builder(builderMethodName="commentWithStatusDTOBuilder")
+    public CommentWithStatusDTO(CommentDTO commentDTO, Long likeCount){
+        super(commentDTO);
+        this.likeCount=likeCount;
+    }
 }

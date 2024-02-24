@@ -1,8 +1,6 @@
 package com.tenius.sns.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.tenius.sns.domain.Post;
-import com.tenius.sns.domain.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

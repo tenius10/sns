@@ -1,21 +1,19 @@
 package com.tenius.sns.service;
 
 import com.tenius.sns.domain.Post;
+import com.tenius.sns.domain.StorageFile;
 import com.tenius.sns.domain.UserInfo;
 import com.tenius.sns.dto.*;
 import com.tenius.sns.exception.InputValueException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
 public interface PostService {
-    default PostDTO entityToDTO(Post post){
-        UserInfo userInfo=post.getWriter();
-        UserInfoDTO userInfoDTO= UserInfoDTO.builder()
-                .uid(userInfo.getUid())
-                .nickname(userInfo.getNickname())
-                .build();
+    static PostDTO entityToDTO(Post post, UserInfo userInfo){
+        UserInfoDTO userInfoDTO=UserInfoService.entityToDTO(userInfo);
         PostDTO postDTO=PostDTO.builder()
                 .pno(post.getPno())
                 .content(post.getContent())
@@ -24,12 +22,21 @@ public interface PostService {
                 .modDate(post.getModDate())
                 .writer(userInfoDTO)
                 .build();
-        List<String> fileNames=post.getImages().stream().sorted()
-                .map(image->FileService.getFileName(image.getUuid(), image.getFileName()))
-                .collect(Collectors.toList());
-        postDTO.setFileNames(fileNames);
+
+        Set<StorageFile> files=post.getFiles();
+        if(files!=null){
+            List<String> fileNames=files.stream().sorted()
+                    .map(file->FileService.getFileName(file.getUuid(), file.getFileName()))
+                    .collect(Collectors.toList());
+            postDTO.setFileNames(fileNames);
+        }
+
         return postDTO;
     }
+    static PostDTO entityToDTO(Post post){
+        return entityToDTO(post, post.getWriter());
+    }
+
     PostDTO register (PostDTO postDTO, String uid) throws InputValueException;
     PostDTO readOne(Long pno);
     PostCommentPageDTO view(Long pno, String uid);

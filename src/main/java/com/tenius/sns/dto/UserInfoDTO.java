@@ -12,8 +12,8 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserInfoDTO {
-    @NotNull
     private String uid;
     @Size(min=2, max=10)
     private String nickname;
+    private String profileName;
 }

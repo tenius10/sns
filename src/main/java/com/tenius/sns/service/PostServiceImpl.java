@@ -9,20 +9,13 @@ import com.tenius.sns.repository.PostRepository;
 import com.tenius.sns.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,14 +23,11 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
-    @Value("{com.tenius.sns.upload.path}")
-    private String uploadPath;
     private final PostRepository postRepository;
     private final PostStatusRepository postStatusRepository;
     private final CommentRepository commentRepository;
     private final UserInfoRepository userInfoRepository;
     private final FileService fileService;
-    private final ModelMapper modelMapper;
 
     @Override
     public PostDTO register(PostDTO postDTO, String uid) throws InputValueException {
@@ -52,18 +42,18 @@ public class PostServiceImpl implements PostService {
         if(fileNames!=null){
             for(String fileName: fileNames){
                 String[] arr=fileName.split(FileService.FILENAME_SEPARATOR);
-                if(arr.length>1) post.addImage(arr[0], arr[1]);
+                if(arr.length>1) post.addFile(arr[0], arr[1]);
                 else throw new InputValueException(InputValueException.ERROR.INVALID_FILE_NAME);
             }
         }
         Post result=postRepository.save(post);
-        return entityToDTO(result);
+        return PostService.entityToDTO(result);
     }
 
     @Override
     public PostDTO readOne(Long pno) {
-        Post result=postRepository.findByIdWithImages(pno).orElseThrow();
-        return entityToDTO(result);
+        Post result=postRepository.findByIdWithFiles(pno).orElseThrow();
+        return PostService.entityToDTO(result);
     }
 
     @Override
@@ -78,27 +68,29 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostCommentPageDTO modify(Long pno, PostDTO postDTO, String uid) throws Exception {
-        Post post=postRepository.findByIdWithImages(pno).orElseThrow();
+        Post post=postRepository.findByIdWithFiles(pno).orElseThrow();
 
         //내용 수정
         post=new Post(post, postDTO.getContent());
 
         //이전에 있던 이미지 삭제
-        Set<PostImage> images=post.getImages();
-        List<String> beforeFileNames=post.getImages().stream()
-                .map(image->FileService.getFileName(image.getUuid(), image.getFileName()))
+        List<String> beforeFileNames=post.getFiles().stream()
+                .map(file->FileService.getFileName(file.getUuid(), file.getFileName()))
                 .collect(Collectors.toList());
         fileService.remove(beforeFileNames);
-
-        post.clearImages();
+        
+        post.clearFiles();
 
         //새로운 이미지 추가
-        if(postDTO.getFileNames()!=null){
-            for(String fileName: postDTO.getFileNames()){
-                String[] arr=fileName.split("_");
-                post.addImage(arr[0], arr[1]);
+        List<String> fileNames=postDTO.getFileNames();
+        if(fileNames!=null){
+            for(String fileName: fileNames){
+                String[] arr=fileName.split(FileService.FILENAME_SEPARATOR);
+                if(arr.length>1) post.addFile(arr[0], arr[1]);
+                else throw new InputValueException(InputValueException.ERROR.INVALID_FILE_NAME);
             }
         }
+
         //변경사항 저장
         postRepository.save(post);
 
@@ -109,8 +101,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void remove(Long pno) throws Exception {
-        Post post=postRepository.findByIdWithImages(pno).orElseThrow();
-        PostDTO postDTO=entityToDTO(post);
+        Post post=postRepository.findByIdWithFiles(pno).orElseThrow();
+        PostDTO postDTO=PostService.entityToDTO(post);
 
         //게시글 삭제 (DB 상에서, 게시글 삭제)
         postRepository.deleteById(pno);

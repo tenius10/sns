@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface FileService {
     String FILENAME_SEPARATOR="_";
+    String DEFAULT_PROFILE="default-profile.png";
     static String getFileName(String uuid, String originalFileName){
         return uuid+FILENAME_SEPARATOR+originalFileName;
     }
@@ -24,4 +25,5 @@ public interface FileService {
     Resource view(String fileName) throws InputValueException;
     void remove(String fileName) throws Exception;
     void remove(List<String> fileNames) throws Exception;
+    boolean isImageFile(String fileName) throws IOException;
 }

@@ -21,8 +21,20 @@ public class UserInfo extends BaseEntity {
     private String uid;
     @Column(length=10)
     private String nickname;
+
     @JoinColumn(name="uid", insertable = false, updatable = false)
     @OneToOne(fetch = FetchType.LAZY)
     @OnDelete(action= OnDeleteAction.CASCADE)
     private User user;
+
+    @OneToOne(cascade = {CascadeType.ALL},
+            orphanRemoval = true)
+    private StorageFile profileImage;
+
+    public UserInfo(UserInfo copy, String nickname, StorageFile profileImage){
+        this.uid=copy.uid;
+        this.user=copy.user;
+        this.nickname=nickname;
+        this.profileImage=profileImage;
+    }
 }

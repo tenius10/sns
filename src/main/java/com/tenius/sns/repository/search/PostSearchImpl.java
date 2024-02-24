@@ -4,8 +4,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPQLQuery;
 import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.*;
-import com.tenius.sns.service.FileService;
-import com.tenius.sns.service.FileServiceImpl;
+import com.tenius.sns.service.PostService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -20,6 +19,13 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         super(Post.class);
     }
 
+    /**
+     * 게시글 목록 페이지의 정보를 가져오는 메서드
+     * @param pageable
+     * @param cursor
+     * @param uid
+     * @return 게시글 목록
+     */
     @Override
     public PageResponseDTO<PostWithStatusDTO> search(Pageable pageable, LocalDateTime cursor, String uid){
         //다음 페이지 존재 여부를 알기 위해서 pageSize를 하나 더하기
@@ -31,11 +37,12 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         QUserInfo userInfo=QUserInfo.userInfo;
         QComment comment=QComment.comment;
         QPostStatus postStatus=QPostStatus.postStatus;
-
+        QStorageFile storageFile=QStorageFile.storageFile;
 
         //쿼리 설정 (좋아요 정보 가져오기)
         JPQLQuery<Post> query=from(post)
                 .leftJoin(userInfo).on(post.writer.eq(userInfo))
+                .leftJoin(storageFile).on(userInfo.profileImage.eq(storageFile))
                 .leftJoin(comment).on(comment.post.eq(post))
                 .groupBy(post.pno);
         //pivot 설정
@@ -62,12 +69,12 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         if(pnoList!=null && pnoList.size()>0){
             //좋아요 개수
             List<Tuple> likeCountList=from(postStatus)
-                    .select(postStatus.pno, postStatus.count())
+                    .select(postStatus.pno, postStatus.countDistinct())
                     .where(postStatus.pno.in(pnoList), postStatus.liked.isTrue())
                     .groupBy(postStatus.pno)
                     .fetch();
             for(Tuple t: likeCountList){
-                likeCountMap.put(t.get(postStatus.pno), t.get(postStatus.count()));
+                likeCountMap.put(t.get(postStatus.pno), t.get(postStatus.countDistinct()));
             }
             //좋아요 눌렀는지 여부
             List<Tuple> likedList= from(postStatus)
@@ -82,29 +89,11 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
 
         //엔티티 튜플을 DTO 리스트로 변환
         List<PostWithStatusDTO> dtoList=tupleList.stream().map(tuple->{
-            Post post1=(Post) tuple.get(post);
-            UserInfo userInfo1=(UserInfo)tuple.get(userInfo);
-            long commentCount=tuple.get(2, Long.class);
-            //작성자 가져오기
-            UserInfoDTO userInfoDTO= UserInfoDTO.builder()
-                    .uid(userInfo1.getUid())
-                    .nickname(userInfo1.getNickname())
-                    .build();
-            //파일명 가져오기
-            List<String> fileNames=post1.getImages().stream().sorted()
-                    .map(image-> FileService.getFileName(image.getUuid(), image.getFileName()))
-                    .collect(Collectors.toList());
-            //게시글 가져오기
-            PostDTO postDTO=PostDTO.builder()
-                    .pno(post1.getPno())
-                    .content(post1.getContent())
-                    .views(post1.getViews())
-                    .regDate(post1.getRegDate())
-                    .modDate(post1.getModDate())
-                    .writer(userInfoDTO)
-                    .fileNames(fileNames)
-                    .build();
-            //댓글 개수, 좋아요 개수 가져오기
+            Post post1= tuple.get(post);
+            UserInfo userInfo1= tuple.get(userInfo);
+            long commentCount=tuple.get(comment.countDistinct());
+
+            PostDTO postDTO=PostService.entityToDTO(post1, userInfo1);
             PostWithStatusDTO postWithStatusDTO=PostWithStatusDTO.postWithStatusDTOBuilder()
                     .postDTO(postDTO)
                     .commentCount(commentCount)
@@ -112,6 +101,7 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
                     .isOwned(userInfo1.getUid().equals(uid))
                     .isLiked(likedMap.getOrDefault(post1.getPno(), false))
                     .build();
+
             return postWithStatusDTO;
         }).collect(Collectors.toList());
 
@@ -135,15 +125,17 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         QUserInfo userInfo=QUserInfo.userInfo;
         QComment comment=QComment.comment;
         QPostStatus postStatus=QPostStatus.postStatus;
+        QStorageFile storageFile=QStorageFile.storageFile;
 
         //쿼리 실행 (게시글, 작성자, 댓글 개수, 좋아요 정보 가져오기)
-        JPQLQuery<Tuple> query=from(post)
+        List<Tuple> tupleList=from(post)
                 .where(post.pno.eq(pno))
                 .leftJoin(userInfo).on(userInfo.eq(post.writer))
+                .leftJoin(storageFile).on(storageFile.eq(userInfo.profileImage))
                 .leftJoin(comment).on(comment.post.eq(post))
                 .groupBy(post)
-                .select(post, userInfo, comment.countDistinct());
-        List<Tuple> tupleList=query.fetch();
+                .select(post, userInfo, comment.countDistinct())
+                .fetch();
         List<String> likeList=from(postStatus)
                 .where(postStatus.pno.eq(pno), postStatus.liked.isTrue())
                 .select(postStatus.uid)
@@ -151,34 +143,17 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
 
         //Entity 튜플을 DTO 리스트로 변환
         List<PostWithStatusDTO> dtoList=tupleList.stream().map(tuple->{
-            Post post1=(Post) tuple.get(post);
-            UserInfo userInfo1=(UserInfo) tuple.get(userInfo);
-            long commentCount=tuple.get(2, Long.class);
-            //작성자 가져오기
-            UserInfoDTO userInfoDTO= UserInfoDTO.builder()
-                    .uid(userInfo1.getUid())
-                    .nickname(userInfo1.getNickname())
-                    .build();
-            //파일명 가져오기
-            List<String> fileNames=post1.getImages().stream().sorted()
-                    .map(image->FileService.getFileName(image.getUuid(), image.getFileName()))
-                    .collect(Collectors.toList());
-            //게시글 가져오기
-            PostDTO postDTO=PostDTO.builder()
-                    .pno(post1.getPno())
-                    .content(post1.getContent())
-                    .regDate(post1.getRegDate())
-                    .modDate(post1.getModDate())
-                    .views(post1.getViews())
-                    .writer(userInfoDTO)
-                    .fileNames(fileNames)
-                    .build();
-            //댓글 개수, 좋아요 개수 가져오기
+            Post post1 = tuple.get(post);
+            UserInfo userInfo1= tuple.get(userInfo);
+            long commentCount=tuple.get(comment.countDistinct());
+
+            PostDTO postDTO= PostService.entityToDTO(post1, userInfo1);
             PostWithStatusDTO postWithStatusDTO=PostWithStatusDTO.postWithStatusDTOBuilder()
                     .postDTO(postDTO)
                     .commentCount(commentCount)
                     .likeCount((long)likeList.size())
                     .build();
+
             return postWithStatusDTO;
         }).collect(Collectors.toList());
 

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 
 public interface PostRepository extends JpaRepository<Post, Long>, PostSearch {
-    @EntityGraph(attributePaths={"images"})
+    @EntityGraph(attributePaths={"files"})
     @Query("select p from Post p where p.pno=:pno")
-    Optional<Post> findByIdWithImages(@Param("pno") Long pno);
+    Optional<Post> findByIdWithFiles(@Param("pno") Long pno);
 }

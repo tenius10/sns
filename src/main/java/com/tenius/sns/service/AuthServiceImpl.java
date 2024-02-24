@@ -34,6 +34,11 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final Util util;
 
+    /**
+     * 회원가입
+     * @param signUpRequestDTO 회원가입 정보
+     * @return 유저 정보 반환
+     */
     @Override
     public UserInfoDTO registerUser(SignUpRequestDTO signUpRequestDTO){
         //아이디, 이메일, 닉네임 중복 검사

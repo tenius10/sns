@@ -29,6 +29,8 @@ public class QUserInfo extends EntityPathBase<UserInfo> {
 
     public final StringPath nickname = createString("nickname");
 
+    public final QStorageFile profileImage;
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> regDate = _super.regDate;
 
@@ -54,6 +56,7 @@ public class QUserInfo extends EntityPathBase<UserInfo> {
 
     public QUserInfo(Class<? extends UserInfo> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.profileImage = inits.isInitialized("profileImage") ? new QStorageFile(forProperty("profileImage"), inits.get("profileImage")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user")) : null;
     }
 

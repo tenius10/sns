@@ -26,7 +26,7 @@ public class QPost extends EntityPathBase<Post> {
 
     public final StringPath content = createString("content");
 
-    public final SetPath<PostImage, QPostImage> images = this.<PostImage, QPostImage>createSet("images", PostImage.class, QPostImage.class, PathInits.DIRECT2);
+    public final SetPath<StorageFile, QStorageFile> files = this.<StorageFile, QStorageFile>createSet("files", StorageFile.class, QStorageFile.class, PathInits.DIRECT2);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modDate = _super.modDate;

@@ -10,7 +10,6 @@ import com.tenius.sns.repository.CommentStatusRepository;
 import com.tenius.sns.repository.PostRepository;
 import com.tenius.sns.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,6 @@ public class CommentServiceImpl implements CommentService {
     private final CommentStatusRepository commentStatusRepository;
     private final PostRepository postRepository;
     private final UserInfoRepository userInfoRepository;
-    private final ModelMapper modelMapper;
 
     @Override
     public CommentDTO register(CommentDTO commentDTO, Long pno, String uid){
@@ -36,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
                 .writer(userInfo)
                 .build();
         Comment result=commentRepository.save(comment);
-        return modelMapper.map(result, CommentDTO.class);
+        return CommentService.entityToDTO(result);
     }
 
     @Override
@@ -50,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment=commentRepository.findById(cno).orElseThrow();
         comment=new Comment(comment, commentDTO.getContent());
         Comment result=commentRepository.save(comment);
-        return modelMapper.map(result, CommentDTO.class);
+        return CommentService.entityToDTO(result);
     }
 
     @Override

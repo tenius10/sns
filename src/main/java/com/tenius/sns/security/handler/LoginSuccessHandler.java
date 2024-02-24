@@ -52,7 +52,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
             if(userDetails==null){
                 throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
             }
-            UserInfoDTO userInfoDTO=userInfoService.getUserInfo(userDetails.getUid());
+            UserInfoDTO userInfoDTO=userInfoService.read(userDetails.getUid());
 
             ErrorResponse errorResponse=new ErrorResponse();
             errorResponse.putItem("message","Login Successful");

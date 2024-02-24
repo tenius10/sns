@@ -1,11 +1,31 @@
 package com.tenius.sns.service;
 
-import com.tenius.sns.dto.CommentDTO;
-import com.tenius.sns.dto.CommentWithStatusDTO;
-import com.tenius.sns.dto.PageRequestDTO;
-import com.tenius.sns.dto.PageResponseDTO;
+import com.tenius.sns.domain.Comment;
+import com.tenius.sns.domain.UserInfo;
+import com.tenius.sns.dto.*;
 
 public interface CommentService {
+    static CommentDTO entityToDTO(Comment comment, UserInfo userInfo){
+        if(comment==null) return null;
+        Long pno=null;
+        if(comment.getPost()!=null) pno=comment.getPost().getPno();
+        UserInfoDTO userInfoDTO=UserInfoService.entityToDTO(userInfo);
+
+        CommentDTO commentDTO=CommentDTO.builder()
+                .cno(comment.getCno())
+                .content(comment.getContent())
+                .writer(userInfoDTO)
+                .pno(pno)
+                .regDate(comment.getRegDate())
+                .modDate(comment.getModDate())
+                .build();
+
+        return commentDTO;
+    }
+    static CommentDTO entityToDTO(Comment comment){
+        return entityToDTO(comment, comment.getWriter());
+    }
+
     CommentDTO register(CommentDTO commentDTO, Long pno, String uid);
     CommentWithStatusDTO readOne(Long cno);
     CommentDTO modify(Long cno, CommentDTO commentDTO);

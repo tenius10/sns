@@ -1,7 +1,6 @@
 package com.tenius.sns.domain;
 
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -17,7 +16,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude= {"writer", "images"})
+@ToString(exclude= {"writer", "files"})
 public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -30,13 +29,11 @@ public class Post extends BaseEntity {
     @OnDelete(action= OnDeleteAction.CASCADE)
     private UserInfo writer;
 
-    @OneToMany(mappedBy = "post",
-            cascade = {CascadeType.ALL},
-            fetch = FetchType.LAZY,
-            orphanRemoval = true)
     @Builder.Default
-    @BatchSize(size=20)
-    private Set<PostImage> images=new HashSet<>();
+    @OneToMany(fetch = FetchType.LAZY,
+            cascade = {CascadeType.ALL},
+            orphanRemoval = true)
+    private Set<StorageFile> files=new HashSet<>();
 
     public Post(Post copy){
         super(copy.getRegDate(), copy.getModDate());
@@ -44,7 +41,7 @@ public class Post extends BaseEntity {
         this.content=copy.content;
         this.views=copy.views;
         this.writer=copy.writer;
-        this.images=copy.images;
+        this.files=copy.files;
     }
     public Post(Post copy, String content){
         this(copy);
@@ -55,18 +52,17 @@ public class Post extends BaseEntity {
         this.views=views;
     }
 
-    public void addImage(String uuid, String fileName){
-        PostImage image=PostImage.builder()
+    public void addFile(String uuid, String fileName){
+        StorageFile file= StorageFile.builder()
                 .uuid(uuid)
                 .fileName(fileName)
-                .ord(images.size())
-                .post(this)
+                .ord(files.size())
+                .uploader(this.writer)
                 .build();
-        images.add(image);
+        files.add(file);
     }
 
-    public void clearImages(){
-        images.forEach(image->image.changePost(null));
-        this.images.clear();
+    public void clearFiles(){
+        this.files.clear();
     }
 }
