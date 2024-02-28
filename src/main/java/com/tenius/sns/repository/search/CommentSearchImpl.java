@@ -5,11 +5,8 @@ import com.querydsl.jpa.JPQLQuery;
 import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.*;
 import com.tenius.sns.service.CommentService;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,11 +16,9 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
         super(Comment.class);
     }
     @Override
-    public PageResponseDTO<CommentWithStatusDTO> search(Long pno, PageRequestDTO pageRequestDTO){
-        Pageable pageable=pageRequestDTO.getPageable();
-        pageable= PageRequest.of(0, pageable.getPageSize()+1, pageable.getSort());
-        LocalDateTime pivot=pageRequestDTO.getCursor()!=null?
-                pageRequestDTO.getCursor().getRegDate(): null;
+    public PageResponseDTO<CommentWithStatusDTO> search(PageRequestDTO pageRequestDTO, Long pno, String myUid){
+        int pageSize=pageRequestDTO.getSize();
+        Long cursor= pageRequestDTO.getCursor();
 
         //Q 도메인
         QUserInfo userInfo=QUserInfo.userInfo;
@@ -38,18 +33,23 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
                 .leftJoin(storageFile).on(storageFile.eq(userInfo.profileImage))
                 .leftJoin(commentStatus).on(comment.cno.eq(commentStatus.cno), commentStatus.liked.isTrue())
                 .groupBy(comment);
-        //pivot 설정
-        if(pivot!=null){
-            if(pageable.getSort().getOrderFor("regDate").isDescending()){
-                query.where(comment.regDate.before(pivot));  //최신순
-            }
-            else{
-                query.where(comment.regDate.after(pivot));  //등록순
-            }
+
+        //페이징 설정 (최신순)
+        if(cursor!=null){
+            query.where(comment.cno.lt(cursor));
         }
-        //페이징 설정
-        this.getQuerydsl().applyPagination(pageable, query);
+        // hasNext 를 확인하기 위해 limit (size + 1)
+        query.orderBy(comment.cno.desc())
+                .limit(pageSize+1);
+
+        //쿼리 실행
         List<Tuple> tupleList=query.select(comment, userInfo, commentStatus.countDistinct()).fetch();
+        List<Long> cnoList=tupleList.stream().map((tuple)->tuple.get(comment).getCno()).collect(Collectors.toList());
+        List<Long> likedCnos= from(commentStatus)
+                .where(commentStatus.uid.eq(myUid), commentStatus.cno.in(cnoList), commentStatus.liked.isTrue())
+                .select(commentStatus.cno)
+                .fetch();
+
 
         //Entity를 DTO로 변환
         List<CommentWithStatusDTO> dtoList=tupleList.stream().map((tuple)->{
@@ -61,13 +61,14 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
             CommentWithStatusDTO commentWithStatusDTO=CommentWithStatusDTO.commentWithStatusDTOBuilder()
                     .commentDTO(commentDTO)
                     .likeCount(likeCount)
+                    .isOwned(userInfo1.getUid().equals(myUid))
+                    .isLiked(likedCnos.contains(comment1.getCno()))
                     .build();
             return commentWithStatusDTO;
         }).collect(Collectors.toList());
 
-        pageable=pageRequestDTO.getPageable();
         boolean hasNext=false;
-        if(dtoList.size()>pageable.getPageSize()){
+        if(dtoList.size()>pageSize){
             dtoList.remove(dtoList.size()-1);
             hasNext=true;
         }
@@ -79,7 +80,7 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
     }
 
     @Override
-    public Optional<CommentWithStatusDTO> findByIdWithAll(Long cno){
+    public Optional<CommentWithStatusDTO> findByIdWithAll(Long cno, String myUid){
         //Q 도메인
         QUserInfo userInfo=QUserInfo.userInfo;
         QComment comment=QComment.comment;
@@ -95,6 +96,11 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
                 .groupBy(comment)
                 .select(comment, userInfo, commentStatus.countDistinct())
                 .fetch();
+        List<Boolean> likeList=from(commentStatus)
+                .where(commentStatus.cno.eq(cno), commentStatus.uid.eq(myUid))
+                .select(commentStatus.liked)
+                .fetch();
+
 
         //Entity를 DTO로 변환
         List<CommentWithStatusDTO> dtoList=tupleList.stream().map(tuple->{
@@ -110,6 +116,14 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
             return commentWithStatusDTO;
         }).collect(Collectors.toList());
 
-        return Optional.ofNullable(dtoList.size()>0?dtoList.get(0):null);
+        //owned와 liked 필드 채우기
+        CommentWithStatusDTO result=null;
+        if(dtoList.size()>0){
+            result=dtoList.get(0);
+            result.setOwned(result.getWriter().getUid().equals(myUid));
+            result.setLiked(likeList.size()>0);
+        }
+
+        return Optional.ofNullable(result);
     }
 }

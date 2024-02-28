@@ -1,9 +1,10 @@
 package com.tenius.sns.controller;
 
-import com.tenius.sns.dto.UserInfoDTO;
+import com.tenius.sns.dto.*;
 import com.tenius.sns.exception.InputValueException;
 import com.tenius.sns.exception.TokenException;
 import com.tenius.sns.security.UserDetailsImpl;
+import com.tenius.sns.service.PostService;
 import com.tenius.sns.service.UserInfoService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -23,18 +24,7 @@ import javax.validation.Valid;
 @RequestMapping("/api/users")
 public class UserInfoController {
     private final UserInfoService userInfoService;
-
-    /**
-     * 특정 유저 페이지를 가지고 오는 API
-     * @param uid
-     * @return 유저 페이지 (닉네임, 프로필, 자기소개, 글 모아보기 등)
-     */
-    @ApiOperation("유저 페이지 조회")
-    @GetMapping("/{uid}")
-    public ResponseEntity<UserInfoDTO> read(@PathVariable String uid){
-        UserInfoDTO result=userInfoService.read(uid);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
+    private final PostService postService;
 
     /**
      * 로그인 직후, 나의 기본 정보를 가져오기 위해서 사용하는 API
@@ -52,6 +42,44 @@ public class UserInfoController {
         String uid=userDetails.getUid();
         UserInfoDTO result=userInfoService.read(uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    /**
+     * 특정 유저 페이지를 가지고 오는 API
+     * @param uid
+     * @return 유저 페이지 (닉네임, 프로필, 자기소개, 글 모아보기 등)
+     */
+    @ApiOperation("유저 페이지 조회")
+    @GetMapping("/{uid}")
+    public ResponseEntity<UserPageDTO> readPage(@PathVariable String uid){
+        //uid 추출
+        String myUid="";
+        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(principal instanceof UserDetailsImpl){
+            myUid=((UserDetailsImpl)principal).getUid();
+        }
+
+        UserPageDTO result=userInfoService.readPage(uid, myUid);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @ApiOperation("유저 게시글 목록 조회")
+    @GetMapping("/{uid}/posts")
+    public ResponseEntity<PageResponseDTO> listPost(@PathVariable String uid, PageRequestDTO pageRequestDTO){
+        //uid 추출
+        String myUid="";
+        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(principal instanceof UserDetailsImpl){
+            myUid=((UserDetailsImpl)principal).getUid();
+        }
+
+        //페이지 조회
+        PageRequestDTO pageRequestDTO1= PageRequestDTO.builder()
+                .cursor(pageRequestDTO.getCursor())
+                .uid(uid)
+                .build();
+        PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO1, myUid);
+        return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
 
     @ApiOperation("회원 정보 수정")

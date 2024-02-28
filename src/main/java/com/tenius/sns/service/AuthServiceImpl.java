@@ -15,7 +15,6 @@ import com.tenius.sns.util.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserInfoRepository userInfoRepository;
     private final TokenBlacklistRepository tokenBlacklistRepository;
     private final PasswordEncoder encoder;
-    private final ModelMapper modelMapper;
     private final JwtUtil jwtUtil;
     private final Util util;
 
@@ -40,12 +38,13 @@ public class AuthServiceImpl implements AuthService {
      * @return 유저 정보 반환
      */
     @Override
-    public UserInfoDTO registerUser(SignUpRequestDTO signUpRequestDTO){
+    public UserInfoDTO registerUser(SignUpRequestDTO signUpRequestDTO) throws InputValueException {
         //아이디, 이메일, 닉네임 중복 검사
         if (userRepository.existsByUsername(signUpRequestDTO.getUsername())) {
             throw new InputValueException(InputValueException.ERROR.DUPLICATE_USERNAME);
         }
-        if (signUpRequestDTO.getEmail()!=null && userRepository.existsByEmail(signUpRequestDTO.getEmail())) {
+        if (signUpRequestDTO.getEmail()!=null && !signUpRequestDTO.getEmail().isEmpty()) {
+            if(userRepository.existsByEmail(signUpRequestDTO.getEmail()))
             throw new InputValueException(InputValueException.ERROR.DUPLICATE_EMAIL);
         }
         if(userInfoRepository.existsByNickname(signUpRequestDTO.getNickname())){
@@ -63,12 +62,14 @@ public class AuthServiceImpl implements AuthService {
         UserInfo userInfo= UserInfo.builder()
                 .uid(uid)
                 .nickname(signUpRequestDTO.getNickname())
+                .user(user)
                 .build();
+        user.initUserInfo(userInfo);
 
-        userRepository.save(user);
-        userInfo=userInfoRepository.save(userInfo);
+        //User, UserInfo 는 OneToOne 으로 연결되어 있기 때문에 하나만 저장
+        User result=userRepository.save(user);
 
-        return modelMapper.map(userInfo, UserInfoDTO.class);
+        return UserInfoService.entityToDTO(result.getUserInfo());
     }
 
     @Override

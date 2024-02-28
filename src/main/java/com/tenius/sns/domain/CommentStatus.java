@@ -32,17 +32,8 @@ public class CommentStatus extends BaseEntity {
     @OnDelete(action=OnDeleteAction.CASCADE)
     private UserInfo user;
 
-    public CommentStatus(CommentStatus copy){
-        super(copy.getRegDate(), copy.getModDate());
-        this.cno=copy.getCno();
-        this.uid=copy.getUid();
-        this.liked=copy.isLiked();
-        this.hided=copy.isHided();
-    }
-    public CommentStatus(CommentStatus copy, boolean liked, boolean hided){
-        this(copy);
+    public void changeLiked(boolean liked){
         this.liked=liked;
-        this.hided=hided;
     }
 
     /**

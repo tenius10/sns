@@ -9,11 +9,9 @@ import com.tenius.sns.repository.PostRepository;
 import com.tenius.sns.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -58,11 +56,18 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostCommentPageDTO view(Long pno, String uid){
+        //조회수 올리기
         Post post=postRepository.findById(pno).orElseThrow();
-        postRepository.save(new Post(post, post.getViews()+1));
+        post.changeViews(post.getViews()+1);
+        postRepository.save(post);
 
+        //게시글 정보 가져오기
         PostWithStatusDTO postCommentCountDTO=postRepository.findByIdWithAll(pno, uid).orElseThrow();
-        PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
+
+        //댓글 정보 가져오기
+        PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
+        PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pageRequestDTO, pno, uid);
+
         return new PostCommentPageDTO(postCommentCountDTO, commentPage);
     }
 
@@ -71,7 +76,7 @@ public class PostServiceImpl implements PostService {
         Post post=postRepository.findByIdWithFiles(pno).orElseThrow();
 
         //내용 수정
-        post=new Post(post, postDTO.getContent());
+        post.changeContent(postDTO.getContent());
 
         //이전에 있던 이미지 삭제
         List<String> beforeFileNames=post.getFiles().stream()
@@ -95,7 +100,8 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
 
         PostWithStatusDTO postCommentCountDTO=postRepository.findByIdWithAll(pno, uid).orElseThrow();
-        PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pno, PageRequestDTO.builder().build());
+        PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
+        PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pageRequestDTO, pno, uid);
         return new PostCommentPageDTO(postCommentCountDTO, commentPage);
     }
 
@@ -113,9 +119,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String uid) {
-        Pageable pageable=pageRequestDTO.getPageable();
-        LocalDateTime cursor=pageRequestDTO.getCursor()!=null?pageRequestDTO.getCursor().getRegDate() : null;
-        PageResponseDTO<PostWithStatusDTO> result=postRepository.search(pageable, cursor, uid);
+        PageResponseDTO<PostWithStatusDTO> result=postRepository.search(pageRequestDTO, uid);
         return result;
     }
 
@@ -135,7 +139,7 @@ public class PostServiceImpl implements PostService {
             PostStatus postStatus=optional.isEmpty()?
                     PostStatus.builder().pno(pno).uid(uid).build()
                     : optional.get();
-            postStatus=new PostStatus(postStatus, true, postStatus.isHided());
+            postStatus.changeLiked(true);
             postStatusRepository.saveWithCheck(postStatus);
         }
 
@@ -151,7 +155,7 @@ public class PostServiceImpl implements PostService {
         //좋아요가 이미 취소된 상황이 아니라면
         if(!optional.isEmpty() && optional.get().isLiked()){
             PostStatus postStatus=optional.get();
-            postStatus=new PostStatus(postStatus, false, postStatus.isHided());
+            postStatus.changeLiked(false);
             postStatusRepository.saveWithCheck(postStatus);
         }
 

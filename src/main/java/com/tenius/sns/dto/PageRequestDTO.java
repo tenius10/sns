@@ -15,11 +15,8 @@ import org.springframework.data.domain.Sort;
 public class PageRequestDTO {
     @Builder.Default
     private int size=10;
-    private Long no;  //cursor 의 식별자가 Long 인 경우
-    private String id;  //cursor 의 식별자가 String 인 경우
-    private CursorDTO cursor;
-
-    public Pageable getPageable(){
-        return PageRequest.of(0, size, Sort.by("regDate").descending());
-    }
+    private String keyword;
+    private Long cursor;
+    private String criteria;
+    private String uid;
 }

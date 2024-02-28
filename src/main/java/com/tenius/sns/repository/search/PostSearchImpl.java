@@ -1,5 +1,6 @@
 package com.tenius.sns.repository.search;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPQLQuery;
 import com.tenius.sns.domain.*;
@@ -9,7 +10,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,53 +19,78 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         super(Post.class);
     }
 
-    /**
-     * 게시글 목록 페이지의 정보를 가져오는 메서드
-     * @param pageable
-     * @param cursor
-     * @param uid
-     * @return 게시글 목록
-     */
     @Override
-    public PageResponseDTO<PostWithStatusDTO> search(Pageable pageable, LocalDateTime cursor, String uid){
-        //다음 페이지 존재 여부를 알기 위해서 pageSize를 하나 더하기
-        int pageSize=pageable.getPageSize();
-        pageable=PageRequest.of(0, pageSize+1, pageable.getSort());
+    public PageResponseDTO<PostWithStatusDTO> search(PageRequestDTO pageRequestDTO, String myUid){
+        int pageSize = pageRequestDTO.getSize();
+        String criteria = pageRequestDTO.getCriteria();
+        String keyword = pageRequestDTO.getKeyword();
+        Long cursor=pageRequestDTO.getCursor();
+        String uid=pageRequestDTO.getUid();
 
-        //Q 도메인
+        // Q 도메인
         QPost post= QPost.post;
         QUserInfo userInfo=QUserInfo.userInfo;
         QComment comment=QComment.comment;
         QPostStatus postStatus=QPostStatus.postStatus;
         QStorageFile storageFile=QStorageFile.storageFile;
 
-        //쿼리 설정 (좋아요 정보 가져오기)
+        // 쿼리 설정
         JPQLQuery<Post> query=from(post)
                 .leftJoin(userInfo).on(post.writer.eq(userInfo))
                 .leftJoin(storageFile).on(userInfo.profileImage.eq(storageFile))
                 .leftJoin(comment).on(comment.post.eq(post))
                 .groupBy(post.pno);
-        //pivot 설정
+
+        // 유저 설정
+        if(uid!=null && !uid.isEmpty()){
+            query.leftJoin(postStatus).on(postStatus.pno.eq(post.pno), postStatus.liked.isTrue());
+            BooleanBuilder booleanBuilder=new BooleanBuilder();
+            booleanBuilder.or(post.writer.uid.eq(uid));
+            booleanBuilder.or(postStatus.uid.eq(uid));
+
+            query.where(booleanBuilder);
+        }
+
+        // 키워드 설정
+        if(keyword!=null && !keyword.isEmpty()) {
+            BooleanBuilder booleanBuilder=new BooleanBuilder();
+            booleanBuilder.or(post.content.contains(keyword));
+            booleanBuilder.or(userInfo.nickname.contains(keyword));
+
+            query.where(booleanBuilder);
+        }
+
+        // 페이징 설정 (기본 정렬 기준 : 최신순)
         if(cursor!=null){
-            if(pageable.getSort().getOrderFor("regDate").isDescending()){
-                query.where(post.regDate.before(cursor));  //최신순
+            if(criteria!=null && criteria.equals("created")){
+                // 등록순
+                query.where(post.pno.gt(cursor))
+                        .orderBy(post.pno.asc());
             }
             else{
-                query.where(post.regDate.after(cursor));  //등록순
+                // 최신순
+                query.where(post.pno.lt(cursor))
+                        .orderBy(post.pno.desc());
             }
+        }else{
+            // 최신순
+            query.orderBy(post.pno.desc());
         }
-        //페이징 설정
-        this.getQuerydsl().applyPagination(pageable, query);
-        //쿼리 실행 (게시글, 작성자, 댓글 개수 가져오기)
+        // hasNext 를 확인하기 위해 limit (size + 1)
+        query.limit(pageSize+1);
+
+        // 쿼리 실행 (게시글, 작성자, 댓글 개수 가져오기)
         List<Tuple> tupleList=query.select(post, userInfo, comment.countDistinct()).fetch();
 
-        //쿼리 실행 (좋아요 정보, 각 게시글에 좋아요를 눌렀는지 여부 가져오기)
+
+        // 쿼리 실행 (좋아요 정보, 각 게시글에 좋아요를 눌렀는지 여부 가져오기)
         Map<Long, Long> likeCountMap=new HashMap<>();  //<pno, likeCount>
         Map<Long, Boolean> likedMap=new HashMap<>();  //<pno, liked>
 
         List<Long> pnoList=tupleList.stream()
                 .map(tuple->tuple.get(post).getPno())
                 .collect(Collectors.toList());
+
         if(pnoList!=null && pnoList.size()>0){
             //좋아요 개수
             List<Tuple> likeCountList=from(postStatus)
@@ -79,7 +104,7 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
             //좋아요 눌렀는지 여부
             List<Tuple> likedList= from(postStatus)
                     .select(postStatus.pno, postStatus.liked)
-                    .where(postStatus.uid.eq(uid), postStatus.pno.in(pnoList), postStatus.liked.isTrue())
+                    .where(postStatus.uid.eq(myUid), postStatus.pno.in(pnoList), postStatus.liked.isTrue())
                     .fetch();
             for(Tuple t: likedList){
                 likedMap.put(t.get(postStatus.pno), t.get(postStatus.liked));
@@ -98,7 +123,7 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
                     .postDTO(postDTO)
                     .commentCount(commentCount)
                     .likeCount(likeCountMap.getOrDefault(post1.getPno(), 0l))
-                    .isOwned(userInfo1.getUid().equals(uid))
+                    .isOwned(userInfo1.getUid().equals(myUid))
                     .isLiked(likedMap.getOrDefault(post1.getPno(), false))
                     .build();
 
@@ -118,8 +143,9 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
                 .build();
     }
 
+
     @Override
-    public Optional<PostWithStatusDTO> findByIdWithAll(Long pno, String uid){
+    public Optional<PostWithStatusDTO> findByIdWithAll(Long pno, String myUid){
         //Q 도메인
         QPost post= QPost.post;
         QUserInfo userInfo=QUserInfo.userInfo;
@@ -161,8 +187,8 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         PostWithStatusDTO result=null;
         if(dtoList.size()>0){
             result=dtoList.get(0);
-            result.setOwned(result.getWriter().getUid().equals(uid));
-            result.setLiked(likeList.contains(uid));
+            result.setOwned(result.getWriter().getUid().equals(myUid));
+            result.setLiked(likeList.contains(myUid));
         }
 
         return Optional.ofNullable(result);

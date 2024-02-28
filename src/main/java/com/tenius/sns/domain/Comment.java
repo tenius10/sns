@@ -28,15 +28,8 @@ public class Comment extends BaseEntity {
     @OnDelete(action=OnDeleteAction.CASCADE)
     private Post post;
 
-    public Comment(Comment copy){
-        super(copy.getRegDate(), copy.getModDate());
-        this.cno=copy.getCno();
-        this.content=copy.getContent();
-        this.writer=copy.getWriter();
-        this.post=copy.getPost();
-    }
-    public Comment(Comment copy, String content){
-        this(copy);
+
+    public void changeContent(String content){
         this.content=content;
     }
 }

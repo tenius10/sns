@@ -1,6 +1,8 @@
 package com.tenius.sns.domain;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -12,7 +14,7 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = "userInfo")
 public class User extends BaseEntity {
     @Id
     @Column(length=16, nullable = false)
@@ -23,4 +25,12 @@ public class User extends BaseEntity {
     private String password;
     @Column(length=50)
     private String email;
+    @OneToOne(mappedBy = "user",
+            cascade = CascadeType.ALL,
+            fetch=FetchType.LAZY)
+    private UserInfo userInfo;
+
+    public void initUserInfo(UserInfo userInfo){
+        this.userInfo=userInfo;
+    }
 }

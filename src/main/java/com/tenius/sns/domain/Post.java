@@ -35,20 +35,11 @@ public class Post extends BaseEntity {
             orphanRemoval = true)
     private Set<StorageFile> files=new HashSet<>();
 
-    public Post(Post copy){
-        super(copy.getRegDate(), copy.getModDate());
-        this.pno=copy.pno;
-        this.content=copy.content;
-        this.views=copy.views;
-        this.writer=copy.writer;
-        this.files=copy.files;
-    }
-    public Post(Post copy, String content){
-        this(copy);
+
+    public void changeContent(String content){
         this.content=content;
     }
-    public Post(Post copy, int views){
-        this(copy);
+    public void changeViews(int views){
         this.views=views;
     }
 

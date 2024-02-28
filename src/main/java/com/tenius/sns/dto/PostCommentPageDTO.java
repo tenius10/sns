@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "commentPage")
-public class PostCommentPageDTO extends PostWithStatusDTO implements CursorDTO {
+public class PostCommentPageDTO extends PostWithStatusDTO {
     private PageResponseDTO<CommentWithStatusDTO> commentPage;
 
     @Builder(builderMethodName = "postCommentPageDTOBuilder")

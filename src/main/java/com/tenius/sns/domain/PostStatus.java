@@ -32,17 +32,8 @@ public class PostStatus extends BaseEntity {
     @OnDelete(action=OnDeleteAction.CASCADE)
     private UserInfo user;
 
-    public PostStatus(PostStatus copy){
-        super(copy.getRegDate(), copy.getModDate());
-        this.pno=copy.getPno();
-        this.uid=copy.getUid();
-        this.liked=copy.isLiked();
-        this.hided=copy.isHided();
-    }
-    public PostStatus(PostStatus copy, boolean liked, boolean hided){
-        this(copy);
+    public void changeLiked(boolean liked){
         this.liked=liked;
-        this.hided=hided;
     }
 
     /**

@@ -24,6 +24,8 @@ public class QUserInfo extends EntityPathBase<UserInfo> {
 
     public final QBaseEntity _super = new QBaseEntity(this);
 
+    public final StringPath intro = createString("intro");
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modDate = _super.modDate;
 
@@ -57,7 +59,7 @@ public class QUserInfo extends EntityPathBase<UserInfo> {
     public QUserInfo(Class<? extends UserInfo> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.profileImage = inits.isInitialized("profileImage") ? new QStorageFile(forProperty("profileImage"), inits.get("profileImage")) : null;
-        this.user = inits.isInitialized("user") ? new QUser(forProperty("user")) : null;
+        this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
     }
 
 }

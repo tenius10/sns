@@ -7,6 +7,6 @@ import com.tenius.sns.dto.PageResponseDTO;
 import java.util.Optional;
 
 public interface CommentSearch {
-    PageResponseDTO<CommentWithStatusDTO> search(Long pno, PageRequestDTO pageRequestDTO);
-    Optional<CommentWithStatusDTO> findByIdWithAll(Long cno);
+    PageResponseDTO<CommentWithStatusDTO> search(PageRequestDTO pageRequestDTO, Long pno, String myUid);
+    Optional<CommentWithStatusDTO> findByIdWithAll(Long cno, String myUid);
 }

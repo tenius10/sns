@@ -27,15 +27,14 @@ public class PostController {
     @ApiOperation("게시글 목록 조회")
     @GetMapping("")
     public ResponseEntity<PageResponseDTO> list(PageRequestDTO pageRequestDTO){
-        if(pageRequestDTO.getNo()!=null){
-            PostDTO cursor=postService.readOne(pageRequestDTO.getNo());
-            pageRequestDTO.setCursor(cursor);
+        //uid 추출
+        String uid="";
+        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(principal instanceof UserDetailsImpl){
+            uid=((UserDetailsImpl)principal).getUid();
         }
 
-        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
-        String uid=(userDetails!=null)? userDetails.getUid():"";
-
+        //페이지 조회
         PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO, uid);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
@@ -43,10 +42,13 @@ public class PostController {
     @ApiOperation("게시글 조회")
     @GetMapping("/{pno}")
     public ResponseEntity<PostCommentPageDTO> read(@PathVariable Long pno){
+        //uid 추출
+        String uid="";
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
-        String uid=(userDetails!=null)? userDetails.getUid():"";
-
+        if(principal instanceof UserDetailsImpl){
+            uid=((UserDetailsImpl)principal).getUid();
+        }
+        //게시글 조회
         PostCommentPageDTO result=postService.view(pno, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
@@ -55,12 +57,15 @@ public class PostController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value="", consumes=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostDTO postDTO){
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails = (UserDetailsImpl) principal;
-        if(userDetails==null){
+        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String uid=null;
+        if(principal instanceof UserDetailsImpl){
+            uid=((UserDetailsImpl)principal).getUid();
+        }
+        if(uid==null){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
-        PostDTO result=postService.register(postDTO, userDetails.getUid());
+        PostDTO result=postService.register(postDTO, uid);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
@@ -69,12 +74,15 @@ public class PostController {
     @PutMapping(value="/{pno}", consumes=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostCommentPageDTO> update(@PathVariable Long pno, @Valid @RequestBody PostDTO postDTO){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
-        if(userDetails==null){
+        String uid=null;
+        if(principal instanceof UserDetailsImpl){
+            uid=((UserDetailsImpl)principal).getUid();
+        }
+        if(uid==null){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
         try{
-            PostCommentPageDTO result=postService.modify(pno, postDTO, userDetails.getUid());
+            PostCommentPageDTO result=postService.modify(pno, postDTO, uid);
             return ResponseEntity.status(HttpStatus.OK).body(result);
         } catch(Exception e){
             log.error(e.getMessage());
@@ -100,11 +108,14 @@ public class PostController {
     @PostMapping("/{pno}/like")
     public ResponseEntity<PostWithStatusDTO> like(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
-        if(userDetails==null){
+        String uid=null;
+        if(principal instanceof UserDetailsImpl){
+            uid=((UserDetailsImpl)principal).getUid();
+        }
+        if(uid==null){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
-        PostWithStatusDTO result=postService.like(pno, userDetails.getUid());
+        PostWithStatusDTO result=postService.like(pno, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -113,11 +124,14 @@ public class PostController {
     @DeleteMapping("/{pno}/like")
     public ResponseEntity<PostWithStatusDTO> unlike(@PathVariable Long pno){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails=(UserDetailsImpl)principal;
-        if(userDetails==null){
+        String uid=null;
+        if(principal instanceof UserDetailsImpl){
+            uid=((UserDetailsImpl)principal).getUid();
+        }
+        if(uid==null){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
-        PostWithStatusDTO result=postService.unlike(pno, userDetails.getUid());
+        PostWithStatusDTO result=postService.unlike(pno, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

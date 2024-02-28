@@ -14,27 +14,33 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = {"user"})
 public class UserInfo extends BaseEntity {
     @Id
     @Column(length=16, nullable = false)
     private String uid;
-    @Column(length=10)
+    @Column(length=10, nullable = false)
     private String nickname;
 
-    @JoinColumn(name="uid", insertable = false, updatable = false)
-    @OneToOne(fetch = FetchType.LAZY)
-    @OnDelete(action= OnDeleteAction.CASCADE)
-    private User user;
+    @Builder.Default
+    @Column(length=100)
+    private String intro = "";
 
-    @OneToOne(cascade = {CascadeType.ALL},
-            orphanRemoval = true)
+    @OneToOne(cascade = {CascadeType.ALL})
     private StorageFile profileImage;
 
-    public UserInfo(UserInfo copy, String nickname, StorageFile profileImage){
-        this.uid=copy.uid;
-        this.user=copy.user;
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uid", updatable = false)
+    private User user;
+
+    public void changeNickname(String nickname){
         this.nickname=nickname;
+    }
+    public void changeIntro(String intro){
+        this.intro=intro;
+    }
+    public void changeProfileImage(StorageFile profileImage){
         this.profileImage=profileImage;
     }
 }

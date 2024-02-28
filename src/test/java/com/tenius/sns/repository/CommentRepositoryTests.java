@@ -17,8 +17,9 @@ public class CommentRepositoryTests {
     @Test
     public void testPagingByCursor(){
         Long pno=104L;
+        String uid="x3SzQoEkSRwDnspp";
         PageRequestDTO pageRequestDTO= PageRequestDTO.builder().build();
-        PageResponseDTO<CommentWithStatusDTO> result=commentRepository.search(pno, pageRequestDTO);
+        PageResponseDTO<CommentWithStatusDTO> result=commentRepository.search(pageRequestDTO, pno, uid);
         log.info("다음 페이지 존재 여부: "+result.isHasNext());
         result.getContent().forEach(commentDTO->log.info(commentDTO));
     }

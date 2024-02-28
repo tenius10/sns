@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostDTO implements CursorDTO {
+public class PostDTO {
     private Long pno;
     @NotBlank
     @Size(max=300)
@@ -24,6 +24,7 @@ public class PostDTO implements CursorDTO {
     private LocalDateTime regDate;
     private LocalDateTime modDate;
     @Min(0)
+    @Builder.Default
     private int views=0;
     private List<String> fileNames;
 
@@ -35,10 +36,5 @@ public class PostDTO implements CursorDTO {
         this.modDate=copy.modDate;
         this.views=copy.views;
         this.fileNames=copy.fileNames;
-    }
-
-    @Override
-    public LocalDateTime getRegDate(){
-        return regDate;
     }
 }

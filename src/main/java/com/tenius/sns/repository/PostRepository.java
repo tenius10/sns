@@ -14,4 +14,5 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostSearch {
     @EntityGraph(attributePaths={"files"})
     @Query("select p from Post p where p.pno=:pno")
     Optional<Post> findByIdWithFiles(@Param("pno") Long pno);
+    long countByWriterUid(String uid);
 }

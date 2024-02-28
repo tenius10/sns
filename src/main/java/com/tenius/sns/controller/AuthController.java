@@ -32,7 +32,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @ApiOperation("회원가입")
-    @PostMapping("/signup")
+    @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserInfoDTO> signUp(@Valid @RequestBody SignUpRequestDTO signUpRequestDTO){
         UserInfoDTO userInfoDTO=authService.registerUser(signUpRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(userInfoDTO);

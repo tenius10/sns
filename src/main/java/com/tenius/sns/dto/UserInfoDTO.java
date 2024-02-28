@@ -16,4 +16,7 @@ public class UserInfoDTO {
     @Size(min=2, max=10)
     private String nickname;
     private String profileName;
+    @Size(max=100)
+    @Builder.Default
+    private String intro="";
 }

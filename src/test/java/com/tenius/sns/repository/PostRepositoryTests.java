@@ -3,6 +3,7 @@ package com.tenius.sns.repository;
 import com.tenius.sns.domain.Post;
 import com.tenius.sns.domain.StorageFile;
 import com.tenius.sns.domain.UserInfo;
+import com.tenius.sns.dto.PageRequestDTO;
 import com.tenius.sns.dto.PageResponseDTO;
 import com.tenius.sns.dto.PostWithStatusDTO;
 import lombok.extern.log4j.Log4j2;
@@ -51,8 +52,8 @@ public class PostRepositoryTests {
     public void testUpdate(){
         Long pno=100L;
         Post post=postRepository.findById(pno).orElseThrow();
-        Post newPost=new Post(post, "수정된 내용");
-        Post result=postRepository.save(newPost);
+        post.changeContent("수정된 내용");
+        Post result=postRepository.save(post);
 
         log.info(result);
     }
@@ -76,13 +77,11 @@ public class PostRepositoryTests {
     }
     @Test
     public void testPagingByCursor(){
-        Long pivot=45L;
         String uid="x3SzQoEkSRwDnspp";
-        Post post=postRepository.findById(pivot).orElseThrow();
-        Pageable pageable=PageRequest.of(0, 10, Sort.by("regDate").descending());
-        LocalDateTime cursor=post.getRegDate();
+        Long cursor=45L;
+        PageRequestDTO pageRequestDTO= PageRequestDTO.builder().cursor(cursor).build();
 
-        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageable, cursor, uid);
+        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageRequestDTO, uid);
         log.info("다음 페이지 존재 여부: "+result.isHasNext());
         result.getContent().forEach(postCommentCountDTO->log.info(postCommentCountDTO));
     }
@@ -109,5 +108,11 @@ public class PostRepositoryTests {
         for(StorageFile file:post.getFiles()){
             log.info(file);
         }
+    }
+    @Test
+    public void testCountByWriter(){
+        String uid="n4Pa4fBASIC8Ska5";
+        long result=postRepository.countByWriterUid(uid);
+        log.info(result);
     }
 }

@@ -38,15 +38,15 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentWithStatusDTO readOne(Long cno){
-        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
-        return result;
+    public CommentDTO readOne(Long cno){
+        Comment result=commentRepository.findById(cno).orElseThrow();
+        return CommentService.entityToDTO(result);
     }
 
     @Override
     public CommentDTO modify(Long cno, CommentDTO commentDTO){
         Comment comment=commentRepository.findById(cno).orElseThrow();
-        comment=new Comment(comment, commentDTO.getContent());
+        comment.changeContent(commentDTO.getContent());
         Comment result=commentRepository.save(comment);
         return CommentService.entityToDTO(result);
     }
@@ -58,8 +58,8 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public PageResponseDTO<CommentWithStatusDTO> readPage(Long pno, PageRequestDTO pageRequestDTO){
-        PageResponseDTO<CommentWithStatusDTO> result=commentRepository.search(pno, pageRequestDTO);
+    public PageResponseDTO<CommentWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, Long pno, String uid){
+        PageResponseDTO<CommentWithStatusDTO> result=commentRepository.search(pageRequestDTO, pno, uid);
         return result;
     }
 
@@ -79,11 +79,11 @@ public class CommentServiceImpl implements CommentService {
             CommentStatus commentStatus=optional.isEmpty()?
                     CommentStatus.builder().cno(cno).uid(uid).build()
                     : optional.get();
-            commentStatus=new CommentStatus(commentStatus, true, commentStatus.isHided());
+            commentStatus.changeLiked(true);
             commentStatusRepository.saveWithCheck(commentStatus);
         }
 
-        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
+        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno, uid).orElseThrow();
         return result;
     }
 
@@ -95,11 +95,11 @@ public class CommentServiceImpl implements CommentService {
         //좋아요가 이미 취소된 상황이 아니라면
         if(!optional.isEmpty() && optional.get().isLiked()){
             CommentStatus commentStatus=optional.get();
-            commentStatus=new CommentStatus(commentStatus, false, commentStatus.isHided());
+            commentStatus.changeLiked(false);
             commentStatusRepository.saveWithCheck(commentStatus);
         }
 
-        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno).orElseThrow();
+        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno,uid).orElseThrow();
         return result;
     }
 }
