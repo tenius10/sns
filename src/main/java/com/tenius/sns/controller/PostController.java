@@ -35,7 +35,7 @@ public class PostController {
         }
 
         //페이지 조회
-        PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO, uid);
+        PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO, null, uid);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
 

@@ -38,8 +38,8 @@ public class UserInfoServiceImpl implements UserInfoService {
         UserInfoDTO userInfoDTO=UserInfoService.entityToDTO(userInfo);
         long postCount=postRepository.countByWriterUid(uid);
 
-        PageRequestDTO pageRequestDTO=PageRequestDTO.builder().uid(uid).build();
-        PageResponseDTO<PostWithStatusDTO> postPage=postRepository.search(pageRequestDTO, myUid);
+        PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
+        PageResponseDTO<PostWithStatusDTO> postPage=postRepository.search(pageRequestDTO, uid, myUid);
 
         UserPageDTO userPageDTO=UserPageDTO.builder()
                 .userInfo(userInfoDTO)

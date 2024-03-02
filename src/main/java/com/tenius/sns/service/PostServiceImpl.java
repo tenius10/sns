@@ -118,8 +118,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String uid) {
-        PageResponseDTO<PostWithStatusDTO> result=postRepository.search(pageRequestDTO, uid);
+    public PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String writerUid, String uid) {
+        PageResponseDTO<PostWithStatusDTO> result=postRepository.search(pageRequestDTO, writerUid, uid);
         return result;
     }
 

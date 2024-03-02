@@ -67,17 +67,10 @@ public class PostServiceTests {
     }
     @Test
     public void testPagingByCursor(){
-        Long pivot=96L;
+        Long cursor=96L;
         String uid="x3SzQoEkSRwDnspp";
-        PostDTO cursor=null;
-        try{
-            cursor=postService.readOne(pivot);
-        }
-        catch(Exception e){
-            log.info(e.getMessage());
-        }
         PageRequestDTO pageRequestDTO=PageRequestDTO.builder().cursor(cursor).build();
-        PageResponseDTO<PostWithStatusDTO> result=postService.readPage(pageRequestDTO, uid);
+        PageResponseDTO<PostWithStatusDTO> result=postService.readPage(pageRequestDTO, null, uid);
 
         log.info(pageRequestDTO);
         result.getContent().forEach(postWithStatusDTO->log.info(postWithStatusDTO));

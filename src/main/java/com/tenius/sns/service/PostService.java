@@ -42,7 +42,7 @@ public interface PostService {
     PostCommentPageDTO view(Long pno, String uid);
     PostCommentPageDTO modify(Long pno, PostDTO postDTO, String uid) throws Exception ;
     void remove(Long pno) throws Exception;
-    PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String uid);
+    PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String writerUid, String uid);
     boolean isPostWriter(Long pno, String uid);
     PostWithStatusDTO like(Long pno, String uid);
     PostWithStatusDTO unlike(Long pno, String uid);

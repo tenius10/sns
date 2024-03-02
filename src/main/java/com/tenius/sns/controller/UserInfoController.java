@@ -26,6 +26,15 @@ public class UserInfoController {
     private final UserInfoService userInfoService;
     private final PostService postService;
 
+    @ApiOperation("유저 검색")
+    @GetMapping("/")
+    public ResponseEntity<PageResponseDTO> search(String cursor, PageRequestDTO pageRequestDTO){
+        log.info("cursor: "+cursor);
+        log.info("pageRequestDTO.curosr: "+pageRequestDTO.getCursor());
+        PageResponseDTO result=null;
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
     /**
      * 로그인 직후, 나의 기본 정보를 가져오기 위해서 사용하는 API
      * @return 나의 기본 정보 (닉네임, 프로필 등)
@@ -76,9 +85,8 @@ public class UserInfoController {
         //페이지 조회
         PageRequestDTO pageRequestDTO1= PageRequestDTO.builder()
                 .cursor(pageRequestDTO.getCursor())
-                .uid(uid)
                 .build();
-        PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO1, myUid);
+        PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO1, uid, myUid);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
 

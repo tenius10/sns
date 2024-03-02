@@ -9,6 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface PostSearch {
-    PageResponseDTO<PostWithStatusDTO> search(PageRequestDTO pageRequestDTO, String myUid);
+    PageResponseDTO<PostWithStatusDTO> search(PageRequestDTO pageRequestDTO, String writerUid, String myUid);
     Optional<PostWithStatusDTO> findByIdWithAll(Long pno, String myUid);
 }

@@ -7,7 +7,6 @@ import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.*;
 import com.tenius.sns.service.PostService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.*;
@@ -20,12 +19,11 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
     }
 
     @Override
-    public PageResponseDTO<PostWithStatusDTO> search(PageRequestDTO pageRequestDTO, String myUid){
+    public PageResponseDTO<PostWithStatusDTO> search(PageRequestDTO pageRequestDTO, String writerUid, String myUid){
         int pageSize = pageRequestDTO.getSize();
         String criteria = pageRequestDTO.getCriteria();
         String keyword = pageRequestDTO.getKeyword();
         Long cursor=pageRequestDTO.getCursor();
-        String uid=pageRequestDTO.getUid();
 
         // Q 도메인
         QPost post= QPost.post;
@@ -42,11 +40,11 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
                 .groupBy(post.pno);
 
         // 유저 설정
-        if(uid!=null && !uid.isEmpty()){
+        if(writerUid!=null && !writerUid.isEmpty()){
             query.leftJoin(postStatus).on(postStatus.pno.eq(post.pno), postStatus.liked.isTrue());
             BooleanBuilder booleanBuilder=new BooleanBuilder();
-            booleanBuilder.or(post.writer.uid.eq(uid));
-            booleanBuilder.or(postStatus.uid.eq(uid));
+            booleanBuilder.or(post.writer.uid.eq(writerUid));
+            booleanBuilder.or(postStatus.uid.eq(writerUid));
 
             query.where(booleanBuilder);
         }
