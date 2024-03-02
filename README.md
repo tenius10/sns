@@ -8,7 +8,7 @@ __개발 환경__ : SpringBoot, JPA, MariaDB, Redis, Swagger, React <br/><br/>
 __키워드__ : RestfulAPI, JWT<br/><br/>
 <br/>
 
-## 🛠️ 핵심 기능
+## 📌 핵심 기능
 - __게시글 CRUD__
 - __커서 기반 페이징__
 - __JWT 인증 (회원가입, 로그인, 자동로그인, 로그아웃, 토큰 밴)__
@@ -21,7 +21,7 @@ __키워드__ : RestfulAPI, JWT<br/><br/>
 
 <br/><br/>
 
-## 프론트 서버
+## 📌 프론트 서버
 https://github.com/tenius10/sns-front
 
 <br/>
@@ -38,7 +38,7 @@ https://github.com/tenius10/sns-front
 
 <br/><br/><br/>
 
-## API 명세서
+## 📌 API 명세서
 
 ![image](https://github.com/tenius10/sns/assets/108507183/beb917c0-54fd-49c7-a6f7-22176b6a26c7)
 
@@ -52,7 +52,7 @@ https://github.com/tenius10/sns-front
 
 <br/><br/><br/>
 
-## DB 설계
+## 📌 DB 설계
 ![image](https://github.com/tenius10/sns/assets/108507183/5bf15dc4-1559-434c-ba47-ec6ea2bec693)
 
 <br/><br/><br/>
