@@ -17,7 +17,7 @@ import java.util.List;
 public class PostDTO {
     private Long pno;
     @NotBlank
-    @Size(max=300)
+    @Size(max=500)
     private String content;
     private UserInfoDTO writer;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")

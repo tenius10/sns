@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class CommentDTO {
     private Long cno;
     @NotBlank
-    @Size(max=100)
+    @Size(max=300)
     private String content;
     @NotNull
     private Long pno;

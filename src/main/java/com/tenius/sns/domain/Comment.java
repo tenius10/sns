@@ -20,6 +20,7 @@ public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long cno;
+    @Column(length=300, nullable=false)
     private String content;
     @ManyToOne(fetch= FetchType.LAZY)
     @OnDelete(action=OnDeleteAction.CASCADE)

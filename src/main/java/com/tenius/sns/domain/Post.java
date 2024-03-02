@@ -21,7 +21,7 @@ public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long pno;
-    @Column(length=300, nullable=false)
+    @Column(length=500, nullable=false)
     private String content;
     @Builder.Default
     private int views=0;

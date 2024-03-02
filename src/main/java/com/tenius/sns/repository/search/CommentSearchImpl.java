@@ -34,12 +34,12 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
                 .leftJoin(commentStatus).on(comment.cno.eq(commentStatus.cno), commentStatus.liked.isTrue())
                 .groupBy(comment);
 
-        //페이징 설정 (최신순)
+        //페이징 설정 (등록순)
         if(cursor!=null){
-            query.where(comment.cno.lt(cursor));
+            query.where(comment.cno.gt(cursor));
         }
         // hasNext 를 확인하기 위해 limit (size + 1)
-        query.orderBy(comment.cno.desc())
+        query.orderBy(comment.cno.asc())
                 .limit(pageSize+1);
 
         //쿼리 실행
