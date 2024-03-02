@@ -20,6 +20,12 @@ __키워드__ : RestfulAPI, JWT<br/><br/>
 - __게시글 검색 (by. 내용 / 작성자)__
 
 <br/><br/>
+
+## 프론트 서버
+https://github.com/tenius10/sns-front
+
+<br/>
+
 ![image](https://github.com/tenius10/sns/assets/108507183/6ee2507f-6364-4963-9a31-ba2918dd1cb8)
 <br/><br/>
 ![image](https://github.com/tenius10/sns/assets/108507183/1f24abd9-36f4-4678-8d6f-b38425d2022a)
