@@ -55,5 +55,12 @@ https://github.com/tenius10/sns-front
 ## ◼️ DB 설계
 ![image](https://github.com/tenius10/sns/assets/108507183/5bf15dc4-1559-434c-ba47-ec6ea2bec693)
 
-<br/><br/><br/>
+<br/><br/>
 
+## ◼️ 이후 추가할 기능
+- __팔로우__
+- __해시태그__
+- __알림__
+- __소셜 로그인__
+
+<br/><br/><br/>
