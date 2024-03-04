@@ -81,7 +81,7 @@ public class PostRepositoryTests {
         Long cursor=45L;
         PageRequestDTO pageRequestDTO= PageRequestDTO.builder().cursor(cursor).build();
 
-        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageRequestDTO, uid);
+        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageRequestDTO, null, uid);
         log.info("다음 페이지 존재 여부: "+result.isHasNext());
         result.getContent().forEach(postCommentCountDTO->log.info(postCommentCountDTO));
     }

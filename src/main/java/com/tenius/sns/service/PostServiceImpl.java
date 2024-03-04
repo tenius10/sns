@@ -74,16 +74,12 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostCommentPageDTO modify(Long pno, PostDTO postDTO, String uid) throws Exception {
         Post post=postRepository.findByIdWithFiles(pno).orElseThrow();
-
-        //내용 수정
-        post.changeContent(postDTO.getContent());
-
-        //이전에 있던 이미지 삭제
         List<String> beforeFileNames=post.getFiles().stream()
                 .map(file->FileService.getFileName(file.getUuid(), file.getFileName()))
                 .collect(Collectors.toList());
-        fileService.remove(beforeFileNames);
-        
+
+        //내용 수정
+        post.changeContent(postDTO.getContent());
         post.clearFiles();
 
         //새로운 이미지 추가
@@ -99,9 +95,21 @@ public class PostServiceImpl implements PostService {
         //변경사항 저장
         postRepository.save(post);
 
+        //수정 성공하고 나서 이전에 있던 이미지 삭제
+        List<String> removeFileNames;
+        if(fileNames!=null){
+            removeFileNames=beforeFileNames.stream()
+                    .filter((fileName)->!fileNames.contains(fileName))
+                    .collect(Collectors.toList());
+        } else{
+            removeFileNames=beforeFileNames;
+        }
+        fileService.remove(removeFileNames);
+
         PostWithStatusDTO postCommentCountDTO=postRepository.findByIdWithAll(pno, uid).orElseThrow();
         PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
         PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pageRequestDTO, pno, uid);
+
         return new PostCommentPageDTO(postCommentCountDTO, commentPage);
     }
 
