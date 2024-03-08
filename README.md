@@ -18,6 +18,7 @@ __키워드__ : RestfulAPI, JWT<br/><br/>
 - __게시글 첨부파일 (사진)__
 - __유저 페이지 조회__
 - __게시글 검색 (by. 내용 / 작성자)__
+- __팔로우__
 
 <br/><br/>
 
@@ -34,8 +35,9 @@ https://github.com/tenius10/sns-front
 <br/>
 ![image](https://github.com/tenius10/sns/assets/108507183/899c099d-0f44-4591-a051-6356a7e1dc9f)
 <br/>
-![image](https://github.com/tenius10/sns/assets/108507183/facde94e-0f5d-4855-8e54-922d21fea70a)
+![image](https://github.com/tenius10/sns/assets/108507183/2acba8c3-a50b-4f6b-8cb1-0631df5cd47b)
 
+![image](https://github.com/tenius10/sns/assets/108507183/b60be552-f325-44a5-8a8d-065308391059)
 <br/><br/><br/>
 
 ## ◼️ API 명세서
@@ -48,20 +50,23 @@ https://github.com/tenius10/sns-front
 
 ![image](https://github.com/tenius10/sns/assets/108507183/a3cd90bb-d9b8-47f2-95fa-aac068a3bf73)
 
-![image](https://github.com/tenius10/sns/assets/108507183/74ef6c56-cfb3-4513-97aa-ada969ecda26)
+![image](https://github.com/tenius10/sns/assets/108507183/ab77b32e-e0fa-4260-9cfe-0390abf455eb)
 
 <br/><br/><br/>
 
 ## ◼️ DB 설계
-![image](https://github.com/tenius10/sns/assets/108507183/5bf15dc4-1559-434c-ba47-ec6ea2bec693)
+![image](https://github.com/tenius10/sns/assets/108507183/d17eb73a-cf19-4d6d-9b56-d8af7040cc62)
 
-<br/><br/>
+follow 테이블은 user_info 테이블의 uid를 외래키로 가집니다.<br/>
+Follow 엔티티와 UserInfo 엔티티 사이에 연관관계를 설정하면 Follow 엔티티 생성시, UserInfo 엔티티를 할당해야 합니다.<br/>
+이 과정에서 DB에 접근하며 발생하는 성능 저하를 막고자 Follow 엔티티에는 연관관계를 설정하지 않았습니다.<br/>
+<br/>
 
 ## ◼️ 이후 추가할 기능
-- __팔로우__
 - __해시태그__
 - __알림__
-- __대댓글__
+- __유저 검색 (by. 닉네임 / 유저ID)__
+- __피드 시스템__
 - __소셜 로그인__
 - __회원 탈퇴__
 
