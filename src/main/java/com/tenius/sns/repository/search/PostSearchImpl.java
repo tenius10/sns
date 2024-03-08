@@ -6,13 +6,11 @@ import com.querydsl.jpa.JPQLQuery;
 import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.*;
 import com.tenius.sns.service.PostService;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Log4j2
 public class PostSearchImpl extends QuerydslRepositorySupport implements PostSearch {
     public PostSearchImpl(){
         super(Post.class);

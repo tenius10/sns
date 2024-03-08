@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name="post",indexes={
+@Table(indexes={
         @Index(name="idx_post_writer_uid", columnList = "writer_uid")
 })
 @Getter

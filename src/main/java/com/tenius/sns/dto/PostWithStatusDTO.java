@@ -4,7 +4,8 @@ import lombok.*;
 
 import javax.validation.constraints.*;
 
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)

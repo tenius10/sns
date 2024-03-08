@@ -2,8 +2,7 @@ package com.tenius.sns.service;
 
 import com.tenius.sns.domain.StorageFile;
 import com.tenius.sns.domain.UserInfo;
-import com.tenius.sns.dto.UserInfoDTO;
-import com.tenius.sns.dto.UserPageDTO;
+import com.tenius.sns.dto.*;
 
 
 public interface UserInfoService {

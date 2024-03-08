@@ -19,4 +19,11 @@ public class UserInfoDTO {
     @Size(max=100)
     @Builder.Default
     private String intro="";
+
+    public UserInfoDTO(UserInfoDTO copy){
+        this.uid=copy.uid;
+        this.nickname=copy.nickname;
+        this.profileName=copy.profileName;
+        this.intro=copy.intro;
+    }
 }

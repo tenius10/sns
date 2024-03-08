@@ -19,5 +19,6 @@ public class UserPageDTO {
     private long followerCount=0;
     @Builder.Default
     private long followingCount=0;
+    private boolean isFollowed;
     private PageResponseDTO<PostWithStatusDTO> postPage;
 }

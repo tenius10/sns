@@ -1,15 +1,18 @@
 package com.tenius.sns.service;
 
+import com.tenius.sns.domain.Follow;
 import com.tenius.sns.domain.StorageFile;
 import com.tenius.sns.domain.UserInfo;
 import com.tenius.sns.dto.*;
 import com.tenius.sns.exception.InputValueException;
+import com.tenius.sns.repository.FollowRepository;
 import com.tenius.sns.repository.PostRepository;
 import com.tenius.sns.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 
 @Log4j2
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserInfoServiceImpl implements UserInfoService {
     private final UserInfoRepository userInfoRepository;
     private final PostRepository postRepository;
+    private final FollowRepository followRepository;
     private final FileService fileService;
 
     @Override
@@ -37,6 +41,9 @@ public class UserInfoServiceImpl implements UserInfoService {
         UserInfo userInfo=userInfoRepository.findByIdWithProfileImage(uid).orElseThrow();
         UserInfoDTO userInfoDTO=UserInfoService.entityToDTO(userInfo);
         long postCount=postRepository.countByWriterUid(uid);
+        long followerCount=followRepository.countByFolloweeUid(uid);
+        long followingCount=followRepository.countByFollowerUid(uid);
+        boolean isFollowed=followRepository.existsByFollowerUidAndFolloweeUid(myUid, uid);
 
         PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
         PageResponseDTO<PostWithStatusDTO> postPage=postRepository.search(pageRequestDTO, uid, myUid);
@@ -44,11 +51,21 @@ public class UserInfoServiceImpl implements UserInfoService {
         UserPageDTO userPageDTO=UserPageDTO.builder()
                 .userInfo(userInfoDTO)
                 .postCount(postCount)
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .isFollowed(isFollowed)
                 .postPage(postPage)
                 .build();
         return userPageDTO;
     }
 
+    /**
+     * 유저 프로필 정보 (프로필 사진, 닉네임, 자기소개) 변경
+     * @param uid 유저 ID
+     * @param userInfoDTO 변경 내용
+     * @return 변경된 프로필 정보 반환
+     * @throws Exception
+     */
     @Override
     public UserInfoDTO modify(String uid, UserInfoDTO userInfoDTO) throws Exception {
         UserInfo userInfo=userInfoRepository.findById(uid).orElseThrow();
