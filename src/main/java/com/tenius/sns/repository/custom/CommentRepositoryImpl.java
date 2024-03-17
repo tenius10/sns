@@ -1,36 +1,38 @@
-package com.tenius.sns.repository.search;
+package com.tenius.sns.repository.custom;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
 import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.*;
 import com.tenius.sns.service.CommentService;
-import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CommentSearchImpl extends QuerydslRepositorySupport implements CommentSearch {
-    public CommentSearchImpl(){
-        super(Comment.class);
-    }
+import static com.tenius.sns.domain.QComment.comment;
+import static com.tenius.sns.domain.QCommentStatus.commentStatus;
+import static com.tenius.sns.domain.QStorageFile.storageFile;
+import static com.tenius.sns.domain.QUserInfo.userInfo;
+
+@RequiredArgsConstructor
+public class CommentRepositoryImpl implements CommentRepositoryCustom {
+    private final JPQLQueryFactory queryFactory;
+
     @Override
     public PageResponseDTO<CommentWithStatusDTO> search(PageRequestDTO pageRequestDTO, Long pno, String myUid){
         int pageSize=pageRequestDTO.getSize();
         Long cursor= pageRequestDTO.getCursor();
 
-        //Q 도메인
-        QUserInfo userInfo=QUserInfo.userInfo;
-        QComment comment=QComment.comment;
-        QCommentStatus commentStatus=QCommentStatus.commentStatus;
-        QStorageFile storageFile=QStorageFile.storageFile;
-
-        //쿼리 실행
-        JPQLQuery<Comment> query=from(comment)
+        //쿼리 설정
+        JPQLQuery<Tuple> query=queryFactory
+                .select(comment, userInfo, commentStatus.countDistinct())
+                .from(comment)
                 .where(comment.post.pno.eq(pno))
-                .leftJoin(userInfo).on(userInfo.eq(comment.writer))
-                .leftJoin(storageFile).on(storageFile.eq(userInfo.profileImage))
+                .leftJoin(userInfo, comment.writer)
+                .leftJoin(storageFile, userInfo.profileImage)
                 .leftJoin(commentStatus).on(comment.cno.eq(commentStatus.cno), commentStatus.liked.isTrue())
                 .groupBy(comment);
 
@@ -43,13 +45,13 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
                 .limit(pageSize+1);
 
         //쿼리 실행
-        List<Tuple> tupleList=query.select(comment, userInfo, commentStatus.countDistinct()).fetch();
+        List<Tuple> tupleList=query.fetch();
         List<Long> cnoList=tupleList.stream().map((tuple)->tuple.get(comment).getCno()).collect(Collectors.toList());
-        List<Long> likedCnos= from(commentStatus)
-                .where(commentStatus.uid.eq(myUid), commentStatus.cno.in(cnoList), commentStatus.liked.isTrue())
+        List<Long> likedCnos= queryFactory
                 .select(commentStatus.cno)
+                .from(commentStatus)
+                .where(commentStatus.uid.eq(myUid), commentStatus.cno.in(cnoList), commentStatus.liked.isTrue())
                 .fetch();
-
 
         //Entity를 DTO로 변환
         List<CommentWithStatusDTO> dtoList=tupleList.stream().map((tuple)->{
@@ -64,6 +66,7 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
                     .isOwned(userInfo1.getUid().equals(myUid))
                     .isLiked(likedCnos.contains(comment1.getCno()))
                     .build();
+
             return commentWithStatusDTO;
         }).collect(Collectors.toList());
 
@@ -81,26 +84,21 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
 
     @Override
     public Optional<CommentWithStatusDTO> findByIdWithAll(Long cno, String myUid){
-        //Q 도메인
-        QUserInfo userInfo=QUserInfo.userInfo;
-        QComment comment=QComment.comment;
-        QCommentStatus commentStatus=QCommentStatus.commentStatus;
-        QStorageFile storageFile=QStorageFile.storageFile;
-
         //쿼리 실행
-        List<Tuple> tupleList=from(comment)
+        List<Tuple> tupleList=queryFactory
+                .select(comment, userInfo, commentStatus.countDistinct())
+                .from(comment)
                 .where(comment.cno.eq(cno))
-                .leftJoin(userInfo).on(userInfo.eq(comment.writer))
-                .leftJoin(storageFile).on(storageFile.eq(userInfo.profileImage))
+                .leftJoin(userInfo, comment.writer)
+                .leftJoin(storageFile, userInfo.profileImage)
                 .leftJoin(commentStatus).on(comment.cno.eq(commentStatus.cno), commentStatus.liked.isTrue())
                 .groupBy(comment)
-                .select(comment, userInfo, commentStatus.countDistinct())
                 .fetch();
-        List<Boolean> likeList=from(commentStatus)
-                .where(commentStatus.cno.eq(cno), commentStatus.uid.eq(myUid))
+        List<Boolean> likeList=queryFactory
                 .select(commentStatus.liked)
+                .from(commentStatus)
+                .where(commentStatus.cno.eq(cno), commentStatus.uid.eq(myUid))
                 .fetch();
-
 
         //Entity를 DTO로 변환
         List<CommentWithStatusDTO> dtoList=tupleList.stream().map(tuple->{
@@ -113,6 +111,7 @@ public class CommentSearchImpl extends QuerydslRepositorySupport implements Comm
                     .commentDTO(commentDTO)
                     .likeCount(likeCount)
                     .build();
+
             return commentWithStatusDTO;
         }).collect(Collectors.toList());
 

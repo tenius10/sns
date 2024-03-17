@@ -1,7 +1,6 @@
 package com.tenius.sns.repository;
 
 import com.tenius.sns.domain.UserInfo;
-import com.tenius.sns.repository.search.FollowSearch;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

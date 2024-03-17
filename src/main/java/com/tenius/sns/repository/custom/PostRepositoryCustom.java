@@ -1,14 +1,12 @@
-package com.tenius.sns.repository.search;
+package com.tenius.sns.repository.custom;
 
 import com.tenius.sns.dto.PageRequestDTO;
 import com.tenius.sns.dto.PageResponseDTO;
 import com.tenius.sns.dto.PostWithStatusDTO;
-import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
-public interface PostSearch {
+public interface PostRepositoryCustom {
     PageResponseDTO<PostWithStatusDTO> search(PageRequestDTO pageRequestDTO, String writerUid, String myUid);
     Optional<PostWithStatusDTO> findByIdWithAll(Long pno, String myUid);
 }

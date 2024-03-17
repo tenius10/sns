@@ -1,20 +1,26 @@
-package com.tenius.sns.repository.search;
+package com.tenius.sns.repository.custom;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tenius.sns.domain.*;
 import com.tenius.sns.dto.*;
 import com.tenius.sns.service.PostService;
-import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PostSearchImpl extends QuerydslRepositorySupport implements PostSearch {
-    public PostSearchImpl(){
-        super(Post.class);
-    }
+import static com.tenius.sns.domain.QComment.comment;
+import static com.tenius.sns.domain.QPost.post;
+import static com.tenius.sns.domain.QPostStatus.postStatus;
+import static com.tenius.sns.domain.QStorageFile.storageFile;
+import static com.tenius.sns.domain.QUserInfo.userInfo;
+
+@RequiredArgsConstructor
+public class PostRepositoryImpl implements PostRepositoryCustom {
+    private final JPAQueryFactory queryFactory;
 
     @Override
     public PageResponseDTO<PostWithStatusDTO> search(PageRequestDTO pageRequestDTO, String writerUid, String myUid){
@@ -23,18 +29,13 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         String keyword = pageRequestDTO.getKeyword();
         Long cursor=pageRequestDTO.getCursor();
 
-        // Q 도메인
-        QPost post= QPost.post;
-        QUserInfo userInfo=QUserInfo.userInfo;
-        QComment comment=QComment.comment;
-        QPostStatus postStatus=QPostStatus.postStatus;
-        QStorageFile storageFile=QStorageFile.storageFile;
-
         // 쿼리 설정
-        JPQLQuery<Post> query=from(post)
-                .leftJoin(userInfo).on(post.writer.eq(userInfo))
-                .leftJoin(storageFile).on(userInfo.profileImage.eq(storageFile))
-                .leftJoin(comment).on(comment.post.eq(post))
+        JPQLQuery<Tuple> query=queryFactory
+                .select(post, userInfo, comment.countDistinct())
+                .from(post)
+                .leftJoin(userInfo, post.writer)
+                .leftJoin(storageFile, userInfo.profileImage)
+                .leftJoin(comment.post, post)
                 .groupBy(post.pno);
 
         // 유저 설정
@@ -76,8 +77,7 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
         query.limit(pageSize+1);
 
         // 쿼리 실행 (게시글, 작성자, 댓글 개수 가져오기)
-        List<Tuple> tupleList=query.select(post, userInfo, comment.countDistinct()).fetch();
-
+        List<Tuple> tupleList=query.fetch();
 
         // 쿼리 실행 (좋아요 정보, 각 게시글에 좋아요를 눌렀는지 여부 가져오기)
         Map<Long, Long> likeCountMap=new HashMap<>();  //<pno, likeCount>
@@ -89,8 +89,9 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
 
         if(pnoList!=null && pnoList.size()>0){
             //좋아요 개수
-            List<Tuple> likeCountList=from(postStatus)
+            List<Tuple> likeCountList=queryFactory
                     .select(postStatus.pno, postStatus.countDistinct())
+                    .from(postStatus)
                     .where(postStatus.pno.in(pnoList), postStatus.liked.isTrue())
                     .groupBy(postStatus.pno)
                     .fetch();
@@ -98,8 +99,9 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
                 likeCountMap.put(t.get(postStatus.pno), t.get(postStatus.countDistinct()));
             }
             //좋아요 눌렀는지 여부
-            List<Tuple> likedList= from(postStatus)
+            List<Tuple> likedList=queryFactory
                     .select(postStatus.pno, postStatus.liked)
+                    .from(postStatus)
                     .where(postStatus.uid.eq(myUid), postStatus.pno.in(pnoList), postStatus.liked.isTrue())
                     .fetch();
             for(Tuple t: likedList){
@@ -142,25 +144,21 @@ public class PostSearchImpl extends QuerydslRepositorySupport implements PostSea
 
     @Override
     public Optional<PostWithStatusDTO> findByIdWithAll(Long pno, String myUid){
-        //Q 도메인
-        QPost post= QPost.post;
-        QUserInfo userInfo=QUserInfo.userInfo;
-        QComment comment=QComment.comment;
-        QPostStatus postStatus=QPostStatus.postStatus;
-        QStorageFile storageFile=QStorageFile.storageFile;
-
         //쿼리 실행 (게시글, 작성자, 댓글 개수, 좋아요 정보 가져오기)
-        List<Tuple> tupleList=from(post)
-                .where(post.pno.eq(pno))
-                .leftJoin(userInfo).on(userInfo.eq(post.writer))
-                .leftJoin(storageFile).on(storageFile.eq(userInfo.profileImage))
-                .leftJoin(comment).on(comment.post.eq(post))
-                .groupBy(post)
+        List<Tuple> tupleList=queryFactory
                 .select(post, userInfo, comment.countDistinct())
+                .from(post)
+                .where(post.pno.eq(pno))
+                .leftJoin(userInfo, post.writer)
+                .leftJoin(storageFile, userInfo.profileImage)
+                .leftJoin(comment.post, post)
+                .groupBy(post)
                 .fetch();
-        List<String> likeList=from(postStatus)
-                .where(postStatus.pno.eq(pno), postStatus.liked.isTrue())
+
+        List<String> likeList=queryFactory
                 .select(postStatus.uid)
+                .from(postStatus)
+                .where(postStatus.pno.eq(pno), postStatus.liked.isTrue())
                 .fetch();
 
         //Entity 튜플을 DTO 리스트로 변환

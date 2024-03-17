@@ -1,34 +1,33 @@
-package com.tenius.sns.repository.search;
+package com.tenius.sns.repository.custom;
 
 import com.querydsl.jpa.JPQLQuery;
-import com.tenius.sns.domain.QFollow;
-import com.tenius.sns.domain.QUserInfo;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tenius.sns.domain.UserInfo;
 import com.tenius.sns.dto.*;
 import com.tenius.sns.service.UserInfoService;
-import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FollowSearchImpl extends QuerydslRepositorySupport implements FollowSearch {
-    public FollowSearchImpl(){
-        super(UserInfo.class);
-    }
+import static com.tenius.sns.domain.QFollow.follow;
+import static com.tenius.sns.domain.QUserInfo.userInfo;
+
+@RequiredArgsConstructor
+public class FollowRepositoryImpl implements FollowRepositoryCustom {
+    private final JPAQueryFactory queryFactory;
 
     @Override
     public PageResponseDTO<FollowDTO> findAllFollowersByFolloweeUid(PageRequestDTO pageRequestDTO, String followeeUid, String myUid){
         int pageSize=pageRequestDTO.getSize();
         Long cursor= pageRequestDTO.getCursor();
 
-        // Q 도메인
-        QUserInfo userInfo=QUserInfo.userInfo;
-        QFollow follow=QFollow.follow;
-
         // 쿼리 설정
-        JPQLQuery<UserInfo> query=from(userInfo)
-                .leftJoin(follow).on(follow.followerUid.eq(userInfo.uid))
-                .where(follow.followeeUid.eq(followeeUid));
+        JPQLQuery<UserInfo> query=queryFactory
+                .select(userInfo)
+                .from(userInfo)
+                .where(follow.followeeUid.eq(followeeUid))
+                .leftJoin(follow).on(follow.followerUid.eq(userInfo.uid));
 
         // 페이징 설정 (최신순)
         if(cursor!=null){
@@ -38,11 +37,12 @@ public class FollowSearchImpl extends QuerydslRepositorySupport implements Follo
                 .limit(pageSize+1);
 
         // 쿼리 실행
-        List<UserInfo> userInfoList=query.select(userInfo).fetch();
+        List<UserInfo> userInfoList=query.fetch();
         List<String> uidList=userInfoList.stream().map((userInfo1)->userInfo1.getUid()).collect(Collectors.toList());
-        List<String> myFollwingList=from(follow)
-                .where(follow.followerUid.eq(myUid),follow.followeeUid.in(uidList))
+        List<String> myFollwingList=queryFactory
                 .select(follow.followeeUid)
+                .from(follow)
+                .where(follow.followerUid.eq(myUid),follow.followeeUid.in(uidList))
                 .fetch();
 
         // Entity를 DTO로 변환
@@ -72,14 +72,12 @@ public class FollowSearchImpl extends QuerydslRepositorySupport implements Follo
         int pageSize= pageRequestDTO.getSize();
         Long cursor=pageRequestDTO.getCursor();
 
-        // Q 도메인
-        QUserInfo userInfo=QUserInfo.userInfo;
-        QFollow follow=QFollow.follow;
-
         // 쿼리 설정
-        JPQLQuery<UserInfo> query=from(userInfo)
-                .leftJoin(follow).on(follow.followeeUid.eq(userInfo.uid))
-                .where(follow.followerUid.eq(followerUid));
+        JPQLQuery<UserInfo> query=queryFactory
+                .select(userInfo)
+                .from(userInfo)
+                .where(follow.followerUid.eq(followerUid))
+                .leftJoin(follow).on(follow.followeeUid.eq(userInfo.uid));
 
         // 페이징 설정 (최신순)
         if(cursor!=null){
@@ -89,11 +87,12 @@ public class FollowSearchImpl extends QuerydslRepositorySupport implements Follo
                 .limit(pageSize+1);
 
         // 쿼리 실행
-        List<UserInfo> userInfoList=query.select(userInfo).fetch();
+        List<UserInfo> userInfoList=query.fetch();
         List<String> uidList=userInfoList.stream().map((userInfo1)->userInfo1.getUid()).collect(Collectors.toList());
-        List<String> myFollowingList=from(follow)
-                .where(follow.followerUid.eq(myUid), follow.followeeUid.in(uidList))
+        List<String> myFollowingList=queryFactory
                 .select(follow.followeeUid)
+                .from(follow)
+                .where(follow.followerUid.eq(myUid), follow.followeeUid.in(uidList))
                 .fetch();
 
         // Entity를 DTO로 변환
