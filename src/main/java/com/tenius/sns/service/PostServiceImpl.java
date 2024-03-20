@@ -53,34 +53,31 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostCommentPageDTO view(Long pno, String uid){
+    public PostWithStatusDTO view(Long pno, String uid){
         //조회수 올리기
         Post post=postRepository.findById(pno).orElseThrow();
         post.changeViews(post.getViews()+1);
         postRepository.save(post);
 
         //게시글 정보 가져오기
-        PostWithStatusDTO postCommentCountDTO=postRepository.findByIdWithAll(pno, uid).orElseThrow();
+        PostWithStatusDTO result=postRepository.findByIdWithAll(pno, uid).orElseThrow();
 
-        //댓글 정보 가져오기
-        PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
-        PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pageRequestDTO, pno, uid);
-
-        return new PostCommentPageDTO(postCommentCountDTO, commentPage);
+        return result;
     }
 
     @Override
-    public PostCommentPageDTO modify(Long pno, PostInputDTO postInputDTO, String uid) throws Exception {
+    public PostWithStatusDTO modify(Long pno, PostInputDTO postInputDTO, String uid) throws Exception {
+        // 이전 게시글 정보 가져오기
         Post post=postRepository.findByIdWithFiles(pno).orElseThrow();
         List<String> beforeFileNames=post.getFiles().stream()
                 .map(file->FileService.getFileName(file.getUuid(), file.getFileName()))
                 .collect(Collectors.toList());
 
-        //내용 수정
+        // 내용 수정
         post.changeContent(postInputDTO.getContent());
         post.clearFiles();
 
-        //새로운 이미지 추가
+        // 새로운 이미지 추가
         List<String> fileNames=postInputDTO.getFileNames();
         if(fileNames!=null){
             for(String fileName: fileNames){
@@ -90,10 +87,10 @@ public class PostServiceImpl implements PostService {
             }
         }
 
-        //변경사항 저장
+        // 변경사항 저장
         postRepository.save(post);
 
-        //수정 성공하고 나서 이전에 있던 이미지 삭제
+        // 수정 성공하고 나서 이전에 있던 이미지 삭제
         List<String> removeFileNames;
         if(fileNames!=null){
             removeFileNames=beforeFileNames.stream()
@@ -104,11 +101,10 @@ public class PostServiceImpl implements PostService {
         }
         fileService.remove(removeFileNames);
 
-        PostWithStatusDTO postCommentCountDTO=postRepository.findByIdWithAll(pno, uid).orElseThrow();
-        PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
-        PageResponseDTO<CommentWithStatusDTO> commentPage=commentRepository.search(pageRequestDTO, pno, uid);
+        // 게시글 정보 새로 가져오기
+        PostWithStatusDTO result=postRepository.findByIdWithAll(pno, uid).orElseThrow();
 
-        return new PostCommentPageDTO(postCommentCountDTO, commentPage);
+        return result;
     }
 
     @Override

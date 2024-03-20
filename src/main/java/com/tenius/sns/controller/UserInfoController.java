@@ -48,16 +48,6 @@ public class UserInfoController {
         }
     }
 
-    @ApiOperation("유저 검색")
-    @GetMapping("/")
-    public ResponseEntity<PageResponseDTO> search(PageRequestDTO pageRequestDTO, String cursor){
-        log.info("cursor: "+cursor);
-        log.info("pageRequestDTO.curosr: "+pageRequestDTO.getCursor());
-        PageResponseDTO result=null;
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
-
-
     /**
      * 유저 페이지 조회
      * @param uid 유저 ID

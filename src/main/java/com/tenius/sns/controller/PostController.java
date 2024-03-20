@@ -41,7 +41,7 @@ public class PostController {
 
     @ApiOperation("게시글 조회")
     @GetMapping("/{pno}")
-    public ResponseEntity<PostCommentPageDTO> read(@PathVariable Long pno){
+    public ResponseEntity<PostWithStatusDTO> read(@PathVariable Long pno){
         //uid 추출
         String uid="";
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -49,7 +49,7 @@ public class PostController {
             uid=((UserDetailsImpl)principal).getUid();
         }
         //게시글 조회
-        PostCommentPageDTO result=postService.view(pno, uid);
+        PostWithStatusDTO result=postService.view(pno, uid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -72,7 +72,7 @@ public class PostController {
     @ApiOperation("게시글 수정")
     @PreAuthorize("@postServiceImpl.isPostWriter(#pno, principal.getUid())")
     @PutMapping(value="/{pno}", consumes=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostCommentPageDTO> update(@PathVariable Long pno, @Valid @RequestBody PostInputDTO postInputDTO){
+    public ResponseEntity<PostWithStatusDTO> update(@PathVariable Long pno, @Valid @RequestBody PostInputDTO postInputDTO){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String uid=null;
         if(principal instanceof UserDetailsImpl){
@@ -82,7 +82,7 @@ public class PostController {
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
         try{
-            PostCommentPageDTO result=postService.modify(pno, postInputDTO, uid);
+            PostWithStatusDTO result=postService.modify(pno, postInputDTO, uid);
             return ResponseEntity.status(HttpStatus.OK).body(result);
         } catch(Exception e){
             log.error(e.getMessage());

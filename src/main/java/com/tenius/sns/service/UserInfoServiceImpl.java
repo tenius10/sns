@@ -44,17 +44,14 @@ public class UserInfoServiceImpl implements UserInfoService {
         long followingCount=followRepository.countByFollowerUid(uid);
         boolean isFollowed=followRepository.existsByFollowerUidAndFolloweeUid(myUid, uid);
 
-        PageRequestDTO pageRequestDTO=PageRequestDTO.builder().build();
-        PageResponseDTO<PostWithStatusDTO> postPage=postRepository.search(pageRequestDTO, uid, myUid);
-
         UserPageDTO userPageDTO=UserPageDTO.builder()
                 .userInfo(userInfoDTO)
                 .postCount(postCount)
                 .followerCount(followerCount)
                 .followingCount(followingCount)
                 .isFollowed(isFollowed)
-                .postPage(postPage)
                 .build();
+
         return userPageDTO;
     }
 

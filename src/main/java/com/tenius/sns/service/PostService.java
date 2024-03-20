@@ -42,8 +42,8 @@ public interface PostService {
 
     PostDTO register (PostInputDTO postInputDTO, String uid) throws InputValueException;
     PostDTO readOne(Long pno);
-    PostCommentPageDTO view(Long pno, String uid);
-    PostCommentPageDTO modify(Long pno, PostInputDTO postInputDTO, String uid) throws Exception ;
+    PostWithStatusDTO view(Long pno, String uid);
+    PostWithStatusDTO modify(Long pno, PostInputDTO postInputDTO, String uid) throws Exception ;
     void remove(Long pno) throws Exception;
     PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String writerUid, String uid);
     boolean isPostWriter(Long pno, String uid);

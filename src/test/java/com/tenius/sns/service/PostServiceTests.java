@@ -35,9 +35,8 @@ public class PostServiceTests {
     public void testView(){
         Long pno=81L;
         String uid="x3SzQoEkSRwDnspp";
-        PostCommentPageDTO result=postService.view(pno, uid);
+        PostWithStatusDTO result=postService.view(pno, uid);
         log.info(result);
-        result.getCommentPage().getContent().forEach(commentDTO -> log.info(commentDTO));
     }
     @Test
     public void testModify(){
@@ -47,7 +46,7 @@ public class PostServiceTests {
                 .content("서비스 수정 테스트")
                 .build();
         try{
-            PostCommentPageDTO result=postService.modify(pno, postInputDTO, uid);
+            PostWithStatusDTO result=postService.modify(pno, postInputDTO, uid);
             log.info(result);
         } catch(Exception e){
             log.error(e.getMessage());
@@ -104,7 +103,7 @@ public class PostServiceTests {
     public void testViewWithImage(){
         Long pno=94L;
         String uid="x3SzQoEkSRwDnspp";
-        PostCommentPageDTO result=postService.view(pno, uid);
+        PostWithStatusDTO result=postService.view(pno, uid);
         log.info(result);
     }
     @Test
@@ -116,7 +115,7 @@ public class PostServiceTests {
                 .fileNames(List.of(UUID.randomUUID()+"_수정된 사진1.jpg", UUID.randomUUID()+"_수정된 사진2.jpg"))
                 .build();
         try{
-            PostCommentPageDTO result=postService.modify(pno, postInputDTO, uid);
+            PostWithStatusDTO result=postService.modify(pno, postInputDTO, uid);
             log.info(result);
         } catch(Exception e){
             log.error(e.getMessage());
