@@ -31,8 +31,8 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .select(comment, userInfo, commentStatus.countDistinct())
                 .from(comment)
                 .where(comment.post.pno.eq(pno))
-                .leftJoin(userInfo, comment.writer)
-                .leftJoin(storageFile, userInfo.profileImage)
+                .leftJoin(userInfo).on(comment.writer.eq(userInfo))
+                .leftJoin(storageFile).on(userInfo.profileImage.eq(storageFile))
                 .leftJoin(commentStatus).on(comment.cno.eq(commentStatus.cno), commentStatus.liked.isTrue())
                 .groupBy(comment);
 
@@ -89,8 +89,8 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .select(comment, userInfo, commentStatus.countDistinct())
                 .from(comment)
                 .where(comment.cno.eq(cno))
-                .leftJoin(userInfo, comment.writer)
-                .leftJoin(storageFile, userInfo.profileImage)
+                .leftJoin(userInfo).on(comment.writer.eq(userInfo))
+                .leftJoin(storageFile).on(userInfo.profileImage.eq(storageFile))
                 .leftJoin(commentStatus).on(comment.cno.eq(commentStatus.cno), commentStatus.liked.isTrue())
                 .groupBy(comment)
                 .fetch();

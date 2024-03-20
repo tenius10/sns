@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    private final String ACCESS_TOKEN="access-token";
+    private static final String ACCESS_TOKEN="access-token";
     private final String REFRESH_TOKEN="refresh-token";
     public final String TOKEN_BLACKLIST_REASON="logout";
     public final long REFRESH_TOKEN_REISSUE_MS=1000*60*60*24*7;  //7일
@@ -140,7 +140,7 @@ public class JwtUtil {
     }
 
     public ResponseCookie getClearTokenCookie(String cookieName){
-        return ResponseCookie.from(cookieName, null)
+        return ResponseCookie.from(cookieName, "clear")
                 .path("/")
                 .maxAge(0)
                 .httpOnly(true)

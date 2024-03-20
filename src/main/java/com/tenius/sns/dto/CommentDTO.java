@@ -2,6 +2,7 @@ package com.tenius.sns.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tenius.sns.service.CommentService;
 import lombok.*;
 
 import javax.validation.constraints.*;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 public class CommentDTO {
     private Long cno;
     @NotBlank
-    @Size(max=300)
+    @Size(max= CommentService.MAX_CONTENT_LENGTH)
     private String content;
     @NotNull
     private Long pno;

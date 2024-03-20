@@ -1,6 +1,5 @@
 package com.tenius.sns.service;
 
-import com.tenius.sns.domain.Follow;
 import com.tenius.sns.domain.StorageFile;
 import com.tenius.sns.domain.UserInfo;
 import com.tenius.sns.dto.*;
@@ -95,7 +94,6 @@ public class UserInfoServiceImpl implements UserInfoService {
                             .uuid(arr[0])
                             .fileName(arr[1])
                             .ord(0)
-                            .uploader(userInfo)
                             .build();
                 } else{
                     throw new InputValueException(InputValueException.ERROR.INVALID_FILE_NAME);

@@ -1,5 +1,6 @@
 package com.tenius.sns.domain;
 
+import com.tenius.sns.service.PostService;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -21,10 +22,10 @@ public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long pno;
-    @Column(length=500, nullable=false)
+    @Column(length= PostService.MAX_CONTENT_LENGTH, nullable=false)
     private String content;
     @Builder.Default
-    private int views=0;
+    private int views = 0;
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action= OnDeleteAction.CASCADE)
     private UserInfo writer;
@@ -48,7 +49,6 @@ public class Post extends BaseEntity {
                 .uuid(uuid)
                 .fileName(fileName)
                 .ord(files.size())
-                .uploader(this.writer)
                 .build();
         files.add(file);
     }

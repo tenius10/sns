@@ -28,15 +28,13 @@ public class PostServiceImpl implements PostService {
     private final FileService fileService;
 
     @Override
-    public PostDTO register(PostDTO postDTO, String uid) throws InputValueException {
+    public PostDTO register(PostInputDTO postInputDTO, String uid) throws InputValueException {
         UserInfo userInfo=userInfoRepository.findById(uid).orElseThrow();
         Post post=Post.builder()
-                .pno(null)
-                .content(postDTO.getContent())
-                .views(0)
+                .content(postInputDTO.getContent())
                 .writer(userInfo)
                 .build();
-        List<String> fileNames=postDTO.getFileNames();
+        List<String> fileNames=postInputDTO.getFileNames();
         if(fileNames!=null){
             for(String fileName: fileNames){
                 String[] arr=fileName.split(FileService.FILENAME_SEPARATOR);
@@ -72,18 +70,18 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostCommentPageDTO modify(Long pno, PostDTO postDTO, String uid) throws Exception {
+    public PostCommentPageDTO modify(Long pno, PostInputDTO postInputDTO, String uid) throws Exception {
         Post post=postRepository.findByIdWithFiles(pno).orElseThrow();
         List<String> beforeFileNames=post.getFiles().stream()
                 .map(file->FileService.getFileName(file.getUuid(), file.getFileName()))
                 .collect(Collectors.toList());
 
         //내용 수정
-        post.changeContent(postDTO.getContent());
+        post.changeContent(postInputDTO.getContent());
         post.clearFiles();
 
         //새로운 이미지 추가
-        List<String> fileNames=postDTO.getFileNames();
+        List<String> fileNames=postInputDTO.getFileNames();
         if(fileNames!=null){
             for(String fileName: fileNames){
                 String[] arr=fileName.split(FileService.FILENAME_SEPARATOR);

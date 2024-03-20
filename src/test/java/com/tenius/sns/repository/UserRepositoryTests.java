@@ -20,24 +20,22 @@ public class UserRepositoryTests {
     public void testInsert(){
         String uid= "mILa4I9Yzp2nkI5g";
 
-        User user=User.builder()
-                .uid(uid)
-                .username("testuser1")
-                .password(encoder.encode("testpassword1"))
-                .build();
         UserInfo userInfo= UserInfo.builder()
                 .uid(uid)
                 .nickname("밤샘코딩")
-                .user(user)
+                .intro("오늘 집중이 안 되는 날이네요...뀽..ㅠㅡㅜ")
                 .build();
-        user.initUserInfo(userInfo);
+        User user=User.builder()
+                .username("testuser1")
+                .password(encoder.encode("testpassword1"))
+                .userInfo(userInfo)
+                .build();
 
-        User result=userRepository.save(user);
-        log.info(result);
+        userRepository.save(user);
     }
     @Test
     public void testDelete(){
-        String uid="sDwfiFh22ILucuPj";
+        String uid="mILa4I9Yzp2nkI5g";
         userRepository.deleteById(uid);
     }
 }

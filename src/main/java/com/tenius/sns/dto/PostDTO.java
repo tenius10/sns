@@ -1,12 +1,12 @@
 package com.tenius.sns.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,14 +16,12 @@ import java.util.List;
 @NoArgsConstructor
 public class PostDTO {
     private Long pno;
-    @NotBlank
-    @Size(max=500)
     private String content;
     private UserInfoDTO writer;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime regDate;
+    @JsonIgnore
     private LocalDateTime modDate;
-    @Min(0)
     @Builder.Default
     private int views=0;
     private List<String> fileNames;

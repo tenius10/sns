@@ -56,7 +56,7 @@ public class PostController {
     @ApiOperation("게시글 등록")
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value="", consumes=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostDTO> create(@Valid @RequestBody PostDTO postDTO){
+    public ResponseEntity<PostDTO> create(@Valid @RequestBody PostInputDTO postInputDTO){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String uid=null;
         if(principal instanceof UserDetailsImpl){
@@ -65,14 +65,14 @@ public class PostController {
         if(uid==null){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
-        PostDTO result=postService.register(postDTO, uid);
+        PostDTO result=postService.register(postInputDTO, uid);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @ApiOperation("게시글 수정")
     @PreAuthorize("@postServiceImpl.isPostWriter(#pno, principal.getUid())")
     @PutMapping(value="/{pno}", consumes=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostCommentPageDTO> update(@PathVariable Long pno, @Valid @RequestBody PostDTO postDTO){
+    public ResponseEntity<PostCommentPageDTO> update(@PathVariable Long pno, @Valid @RequestBody PostInputDTO postInputDTO){
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String uid=null;
         if(principal instanceof UserDetailsImpl){
@@ -82,7 +82,7 @@ public class PostController {
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
         try{
-            PostCommentPageDTO result=postService.modify(pno, postDTO, uid);
+            PostCommentPageDTO result=postService.modify(pno, postInputDTO, uid);
             return ResponseEntity.status(HttpStatus.OK).body(result);
         } catch(Exception e){
             log.error(e.getMessage());

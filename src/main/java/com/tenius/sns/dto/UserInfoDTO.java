@@ -1,5 +1,6 @@
 package com.tenius.sns.dto;
 
+import com.tenius.sns.service.UserInfoService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +14,10 @@ import javax.validation.constraints.*;
 @NoArgsConstructor
 public class UserInfoDTO {
     private String uid;
-    @Size(min=2, max=10)
+    @Size(min = UserInfoService.MIN_NICKNAME_LENGTH, max = UserInfoService.MAX_NICKNAME_LENGTH)
     private String nickname;
     private String profileName;
-    @Size(max=100)
+    @Size(max = UserInfoService.MAX_INTRO_LENGTH)
     @Builder.Default
     private String intro="";
 

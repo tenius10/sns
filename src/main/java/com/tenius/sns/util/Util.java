@@ -9,9 +9,9 @@ import java.security.SecureRandom;
 
 @Component
 public class Util {
+    public static final int UID_LENGTH=16;
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private final SecureRandom RANDOM = new SecureRandom();
-    private final int UID_LENGTH=16;
     @Autowired
     private UserRepository userRepository;
 

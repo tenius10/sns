@@ -1,5 +1,6 @@
 package com.tenius.sns.domain;
 
+import com.tenius.sns.service.CommentService;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -20,7 +21,7 @@ public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long cno;
-    @Column(length=300, nullable=false)
+    @Column(length= CommentService.MAX_CONTENT_LENGTH, nullable=false)
     private String content;
     @ManyToOne(fetch= FetchType.LAZY)
     @OnDelete(action=OnDeleteAction.CASCADE)

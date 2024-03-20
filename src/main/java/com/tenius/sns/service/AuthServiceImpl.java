@@ -53,22 +53,27 @@ public class AuthServiceImpl implements AuthService {
 
         //유저 계정 생성
         String uid= util.generateUid();
-        User user=User.builder()
-                .uid(uid)
-                .username(signUpRequestDTO.getUsername())
-                .password(encoder.encode(signUpRequestDTO.getPassword()))
-                .email(signUpRequestDTO.getEmail())
-                .build();
+        //중복되지 않는 uid 인지 확인하는 코드가 들어가면 좋겠다.
+        //어지간해서는 안 겹치겠지만 겹쳤을 때 위험하니까.
+
+        //패스워드의 복잡성을 검사하는 코드도 필요하고
+        //이메일 형식 검사와
+        //실제로 존재하는 본인 이메일인지 확인하는 기능도 필요
+
         UserInfo userInfo= UserInfo.builder()
                 .uid(uid)
                 .nickname(signUpRequestDTO.getNickname())
-                .user(user)
                 .build();
-        user.initUserInfo(userInfo);
+
+        User user=User.builder()
+                .username(signUpRequestDTO.getUsername())
+                .password(encoder.encode(signUpRequestDTO.getPassword()))
+                .email(signUpRequestDTO.getEmail())
+                .userInfo(userInfo)
+                .build();
 
         //User, UserInfo 는 OneToOne 으로 연결되어 있기 때문에 하나만 저장
-        User result=userRepository.save(user);
-
+        User result = userRepository.save(user);
         return UserInfoService.entityToDTO(result.getUserInfo());
     }
 

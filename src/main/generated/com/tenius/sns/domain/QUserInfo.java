@@ -38,8 +38,6 @@ public class QUserInfo extends EntityPathBase<UserInfo> {
 
     public final StringPath uid = createString("uid");
 
-    public final QUser user;
-
     public QUserInfo(String variable) {
         this(UserInfo.class, forVariable(variable), INITS);
     }
@@ -58,8 +56,7 @@ public class QUserInfo extends EntityPathBase<UserInfo> {
 
     public QUserInfo(Class<? extends UserInfo> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.profileImage = inits.isInitialized("profileImage") ? new QStorageFile(forProperty("profileImage"), inits.get("profileImage")) : null;
-        this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
+        this.profileImage = inits.isInitialized("profileImage") ? new QStorageFile(forProperty("profileImage")) : null;
     }
 
 }

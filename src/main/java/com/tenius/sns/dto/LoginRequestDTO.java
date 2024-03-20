@@ -1,5 +1,6 @@
 package com.tenius.sns.dto;
 
+import com.tenius.sns.service.AuthService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +14,9 @@ import javax.validation.constraints.*;
 @NoArgsConstructor
 public class LoginRequestDTO {
     @NotBlank
-    @Size(min=8, max=15)
+    @Size(min= AuthService.MIN_USERNAME_LENGTH, max=AuthService.MAX_USERNAME_LENGTH)
     private String username;
     @NotBlank
-    @Size(min=12, max=20)
+    @Size(min=AuthService.MIN_PASSWORD_LENGTH, max=AuthService.MAX_PASSWORD_LENGTH)
     private String password;
 }

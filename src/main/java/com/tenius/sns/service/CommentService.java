@@ -5,6 +5,7 @@ import com.tenius.sns.domain.UserInfo;
 import com.tenius.sns.dto.*;
 
 public interface CommentService {
+    int MAX_CONTENT_LENGTH=500;
     static CommentDTO entityToDTO(Comment comment, UserInfo userInfo){
         if(comment==null) return null;
         Long pno=null;

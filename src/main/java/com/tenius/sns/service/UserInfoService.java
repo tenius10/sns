@@ -6,6 +6,10 @@ import com.tenius.sns.dto.*;
 
 
 public interface UserInfoService {
+    int MIN_NICKNAME_LENGTH=2;
+    int MAX_NICKNAME_LENGTH=10;
+    int MAX_INTRO_LENGTH=300;
+
     static UserInfoDTO entityToDTO(UserInfo userInfo){
         if(userInfo==null) return null;
         StorageFile file=userInfo.getProfileImage();

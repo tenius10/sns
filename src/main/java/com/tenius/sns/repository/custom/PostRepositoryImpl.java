@@ -33,9 +33,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         JPQLQuery<Tuple> query=queryFactory
                 .select(post, userInfo, comment.countDistinct())
                 .from(post)
-                .leftJoin(userInfo, post.writer)
-                .leftJoin(storageFile, userInfo.profileImage)
-                .leftJoin(comment.post, post)
+                .leftJoin(userInfo).on(post.writer.eq(userInfo))
+                .leftJoin(storageFile).on(userInfo.profileImage.eq(storageFile))
+                .leftJoin(comment).on(comment.post.eq(post))
                 .groupBy(post.pno);
 
         // 유저 설정
@@ -149,9 +149,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .select(post, userInfo, comment.countDistinct())
                 .from(post)
                 .where(post.pno.eq(pno))
-                .leftJoin(userInfo, post.writer)
-                .leftJoin(storageFile, userInfo.profileImage)
-                .leftJoin(comment.post, post)
+                .leftJoin(userInfo).on(post.writer.eq(userInfo))
+                .leftJoin(storageFile).on(userInfo.profileImage.eq(storageFile))
+                .leftJoin(comment).on(comment.post.eq(post))
                 .groupBy(post)
                 .fetch();
 

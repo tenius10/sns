@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
@@ -22,7 +22,7 @@ public class UserDetailsImpl implements UserDetails {
 
     public static UserDetailsImpl build(User user){
         return new UserDetailsImpl(
-                user.getUid(),
+                user.getUserInfo().getUid(),
                 user.getUsername(),
                 user.getPassword(),
                 user.getEmail()

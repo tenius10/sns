@@ -1,8 +1,8 @@
 package com.tenius.sns.domain;
 
+import com.tenius.sns.service.UserInfoService;
+import com.tenius.sns.util.Util;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -14,25 +14,18 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"user"})
 public class UserInfo extends BaseEntity {
     @Id
-    @Column(length=16, nullable = false)
+    @Column(length= Util.UID_LENGTH, nullable = false)
     private String uid;
-    @Column(length=10, nullable = false)
+    @Column(length= UserInfoService.MAX_NICKNAME_LENGTH, nullable = false)
     private String nickname;
-
     @Builder.Default
-    @Column(length=100)
+    @Column(length=UserInfoService.MAX_INTRO_LENGTH)
     private String intro = "";
-
     @OneToOne(cascade = {CascadeType.ALL})
     private StorageFile profileImage;
 
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uid", updatable = false)
-    private User user;
 
     public void changeNickname(String nickname){
         this.nickname=nickname;

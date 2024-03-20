@@ -1,36 +1,25 @@
 package com.tenius.sns.domain;
 
+import com.tenius.sns.service.AuthService;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name="user_auth", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "username"),
         @UniqueConstraint(columnNames = "email")})
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = "userInfo")
 public class User extends BaseEntity {
     @Id
-    @Column(length=16, nullable = false)
-    private String uid;
-    @Column(length=15, nullable=false)
+    @Column(length= AuthService.MAX_USERNAME_LENGTH, nullable=false)
     private String username;
     @Column(nullable=false)
     private String password;
-    @Column(length=50)
+    @Column(length=AuthService.MAX_EMAIL_LENGTH)
     private String email;
-    @OneToOne(mappedBy = "user",
-            cascade = CascadeType.ALL,
-            fetch=FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL)
     private UserInfo userInfo;
-
-    public void initUserInfo(UserInfo userInfo){
-        this.userInfo=userInfo;
-    }
 }

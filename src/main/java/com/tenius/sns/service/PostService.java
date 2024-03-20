@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 
 public interface PostService {
+    int MAX_CONTENT_LENGTH=1000;
+    int MAX_FILE_COUNT=10;
+
     static PostDTO entityToDTO(Post post, UserInfo userInfo){
         UserInfoDTO userInfoDTO=UserInfoService.entityToDTO(userInfo);
         PostDTO postDTO=PostDTO.builder()
@@ -37,10 +40,10 @@ public interface PostService {
         return entityToDTO(post, post.getWriter());
     }
 
-    PostDTO register (PostDTO postDTO, String uid) throws InputValueException;
+    PostDTO register (PostInputDTO postInputDTO, String uid) throws InputValueException;
     PostDTO readOne(Long pno);
     PostCommentPageDTO view(Long pno, String uid);
-    PostCommentPageDTO modify(Long pno, PostDTO postDTO, String uid) throws Exception ;
+    PostCommentPageDTO modify(Long pno, PostInputDTO postInputDTO, String uid) throws Exception ;
     void remove(Long pno) throws Exception;
     PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String writerUid, String uid);
     boolean isPostWriter(Long pno, String uid);
