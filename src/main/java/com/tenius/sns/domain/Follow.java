@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Builder
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(indexes={

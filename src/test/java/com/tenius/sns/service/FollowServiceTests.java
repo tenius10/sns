@@ -23,8 +23,8 @@ public class FollowServiceTests {
     }
     @Test
     public void testUnfollow(){
-        String followerUid="JIr7YvhxDLO2tqCt";
-        String followeeUid="LwDzsVcEdRv01hT5";
+        String followerUid="OaEajAEcfu9HkKJr";
+        String followeeUid="tRSH7Wlqn1PsPKRL";
         followService.unfollow(followerUid, followeeUid);
     }
 

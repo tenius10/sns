@@ -14,10 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CommentDTO {
     private Long cno;
-    @NotBlank
-    @Size(max= CommentService.MAX_CONTENT_LENGTH)
     private String content;
-    @NotNull
     private Long pno;
     private UserInfoDTO writer;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")

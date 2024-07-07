@@ -27,12 +27,13 @@ public interface CommentService {
         return entityToDTO(comment, comment.getWriter());
     }
 
-    CommentDTO register(CommentDTO commentDTO, Long pno, String uid);
-    CommentDTO readOne(Long cno);
-    CommentDTO modify(Long cno, CommentDTO commentDTO);
+    Long register(CommentInputDTO commentInputDTO, Long pno, String myUid);
+    CommentDTO read(Long cno);
+    CommentWithStatusDTO readWithStatus(Long cno, String myUid);
+    Long modify(Long cno, CommentInputDTO commentInputDTO);
     void remove(Long cno);
-    PageResponseDTO<CommentWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, Long pno, String uid);
-    boolean isCommentWriter(Long cno, String uid);
-    CommentWithStatusDTO like(Long cno, String uid);
-    CommentWithStatusDTO unlike(Long cno, String uid);
+    PageResponseDTO<CommentWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, Long pno, String myUid);
+    boolean isCommentWriter(Long cno, String myUid);
+    Long like(Long cno, String myUid);
+    Long unlike(Long cno, String myUid);
 }

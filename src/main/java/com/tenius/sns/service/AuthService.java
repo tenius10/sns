@@ -13,7 +13,7 @@ public interface AuthService {
     int MAX_PASSWORD_LENGTH=20;
     int MAX_EMAIL_LENGTH=100;
 
-    UserInfoDTO registerUser(SignUpRequestDTO signUpRequestDTO) throws InputValueException;
+    String registerUser(SignUpRequestDTO signUpRequestDTO) throws InputValueException;
     boolean isTokenInBlacklist(String token) throws TokenException;
     void registerTokenInBlacklist(String token, String reason);
 }

@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostStatusKey implements Serializable {
+public class PostLikeKey implements Serializable {
     private Long pno;
     private String uid;
 }

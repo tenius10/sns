@@ -40,13 +40,13 @@ public interface PostService {
         return entityToDTO(post, post.getWriter());
     }
 
-    PostDTO register (PostInputDTO postInputDTO, String uid) throws InputValueException;
-    PostDTO readOne(Long pno);
-    PostWithStatusDTO view(Long pno, String uid);
-    PostWithStatusDTO modify(Long pno, PostInputDTO postInputDTO, String uid) throws Exception ;
+    Long register (PostInputDTO postInputDTO, String myUid) throws InputValueException;
+    PostDTO readWithFiles(Long pno);
+    PostWithStatusDTO viewWithStatus(Long pno, String myUid);
+    Long modify(Long pno, PostInputDTO postInputDTO) throws Exception ;
     void remove(Long pno) throws Exception;
-    PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, String writerUid, String uid);
-    boolean isPostWriter(Long pno, String uid);
-    PostWithStatusDTO like(Long pno, String uid);
-    PostWithStatusDTO unlike(Long pno, String uid);
+    PageResponseDTO<PostWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, SearchOptionDTO searchOptionDTO, String myUid);
+    boolean isPostWriter(Long pno, String myUid);
+    Long like(Long pno, String myUid);
+    Long unlike(Long pno, String myUid);
 }

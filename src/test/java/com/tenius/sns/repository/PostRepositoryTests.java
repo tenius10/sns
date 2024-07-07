@@ -6,6 +6,7 @@ import com.tenius.sns.domain.UserInfo;
 import com.tenius.sns.dto.PageRequestDTO;
 import com.tenius.sns.dto.PageResponseDTO;
 import com.tenius.sns.dto.PostWithStatusDTO;
+import com.tenius.sns.dto.SearchOptionDTO;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -44,9 +45,10 @@ public class PostRepositoryTests {
     }
     @Test
     public void testRead(){
-        Long pno=45L;
-        Post result=postRepository.findById(pno).orElseThrow();
-        log.info(result.getWriter().getUid());
+        Long pno=2L;
+        String uid="mILa4I9Yzp2nkI5g";
+        PostWithStatusDTO result=postRepository.findByIdWithAll(pno, uid).orElseThrow();
+        log.info(result);
     }
     @Test
     public void testUpdate(){
@@ -78,10 +80,11 @@ public class PostRepositoryTests {
     @Test
     public void testPagingByCursor(){
         String uid="x3SzQoEkSRwDnspp";
-        Long cursor=45L;
+        Long cursor=null;
         PageRequestDTO pageRequestDTO= PageRequestDTO.builder().cursor(cursor).build();
+        SearchOptionDTO searchOptionDTO=SearchOptionDTO.builder().keyword("테스트").build();
+        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageRequestDTO, searchOptionDTO, uid);
 
-        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageRequestDTO, null, uid);
         log.info("다음 페이지 존재 여부: "+result.isHasNext());
         result.getContent().forEach(postCommentCountDTO->log.info(postCommentCountDTO));
     }

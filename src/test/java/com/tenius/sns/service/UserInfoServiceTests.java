@@ -2,6 +2,7 @@ package com.tenius.sns.service;
 
 import com.tenius.sns.domain.Post;
 import com.tenius.sns.dto.*;
+import com.tenius.sns.repository.PostRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import java.util.List;
 public class UserInfoServiceTests {
     @Autowired
     private UserInfoService userInfoService;
+    @Autowired
+    private PostRepository postRepository;
 
     @Test
     public void testRead(){
@@ -32,8 +35,8 @@ public class UserInfoServiceTests {
                 .profileName(null)
                 .build();
         try{
-            UserInfoDTO result=userInfoService.modify(uid, userInfoDTO);
-            log.info(result);
+            String result=userInfoService.modify(uid, userInfoDTO);
+            log.info("수정한 유저의 ID : " + result);
         }
         catch(Exception e){
             log.error(e);
@@ -51,12 +54,17 @@ public class UserInfoServiceTests {
         log.info("팔로워 수 : "+result.getFollowerCount());
         log.info("팔로잉 수 : "+result.getFollowingCount());
         log.info("팔로우 여부 : "+result.isFollowed());
-        List<PostWithStatusDTO> postList=result.getPostPage().getContent();
-        boolean hasNext=result.getPostPage().isHasNext();
+    }
 
-        if(postList!=null){
-            postList.forEach(post->log.info(post));
-        }
-        log.info("다음 게시글 페이지 여부 : "+hasNext);
+    @Test
+    public void testReadPostPage(){
+        String uid="mILa4I9Yzp2nkI5g";
+        Long cursor=null;
+        PageRequestDTO pageRequestDTO= PageRequestDTO.builder().cursor(cursor).build();
+        SearchOptionDTO searchOptionDTO=SearchOptionDTO.builder().relatedUid("mILa4I9Yzp2nkI5g").build();
+        PageResponseDTO<PostWithStatusDTO> result =postRepository.search(pageRequestDTO, searchOptionDTO, uid);
+
+        log.info("다음 페이지 존재 여부: "+result.isHasNext());
+        result.getContent().forEach(postCommentCountDTO->log.info(postCommentCountDTO));
     }
 }

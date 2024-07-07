@@ -37,10 +37,16 @@ public class UserInfoController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     public ResponseEntity<UserInfoDTO> readMe(){
+        // Context 에서 principal 가져오기
         Object principal= SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         if(principal!=null && principal instanceof UserDetailsImpl){
-            String uid=((UserDetailsImpl)principal).getUid();
-            UserInfoDTO result=userInfoService.read(uid);
+            // myUid 추출
+            String myUid=((UserDetailsImpl)principal).getUid();
+            
+            // 유저 정보 조회
+            UserInfoDTO result=userInfoService.read(myUid);
+
             return ResponseEntity.status(HttpStatus.OK).body(result);
         }
         else{
@@ -56,9 +62,11 @@ public class UserInfoController {
     @ApiOperation("유저 페이지 조회")
     @GetMapping("/{uid}")
     public ResponseEntity<UserPageDTO> readPage(@PathVariable String uid){
-        //uid 추출
-        String myUid="";
+        // Context 에서 principal 가져오기
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // myUid 추출
+        String myUid="";
         if(principal instanceof UserDetailsImpl){
             myUid=((UserDetailsImpl)principal).getUid();
         }
@@ -67,21 +75,28 @@ public class UserInfoController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @ApiOperation("회원 정보 수정")
+    @ApiOperation("유저 정보 수정")
     @PreAuthorize("#uid == principal.getUid()")
     @PutMapping(value="/{uid}", consumes= MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserInfoDTO> update(@PathVariable String uid, @Valid @RequestBody UserInfoDTO userInfoDTO){
+    public ResponseEntity<String> update(@PathVariable String uid, @Valid @RequestBody UserInfoDTO userInfoDTO){
+        // Context 에서 principal 가져오기
         Object principal= SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // 인증 정보가 없는 경우 수정 불가 (에러 던지기)
         UserDetailsImpl userDetails=(UserDetailsImpl)principal;
         if(userDetails==null){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
+
         try{
-            UserInfoDTO result=userInfoService.modify(uid, userInfoDTO);
+            // 유저 정보 수정
+            String result=userInfoService.modify(uid, userInfoDTO);
             return ResponseEntity.status(HttpStatus.OK).body(result);
+
         } catch(InputValueException e){
             log.error("이미지 타입의 프로필 사진을 넣어주세요.");
             throw e;
+
         } catch(Exception e){
             log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -91,14 +106,21 @@ public class UserInfoController {
     @ApiOperation("팔로우")
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{followeeUid}/follow")
-    public ResponseEntity<Void> follow(@PathVariable String followeeUid){
+    public ResponseEntity<String> follow(@PathVariable String followeeUid){
+        // Context 에서 principal 가져오기
         Object principal= SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         if(principal!=null && principal instanceof UserDetailsImpl){
+            // myUid 추출
             String myUid=((UserDetailsImpl)principal).getUid();
-            followService.follow(myUid, followeeUid);
-            return ResponseEntity.status(HttpStatus.OK).build();
+
+            // 팔로우
+            String result=followService.follow(myUid, followeeUid);
+
+            return ResponseEntity.status(HttpStatus.OK).body(result);
         }
         else{
+            // 인증 정보가 없는 경우 팔로우 불가 (에러 던지기)
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
     }
@@ -106,14 +128,21 @@ public class UserInfoController {
     @ApiOperation("언팔로우")
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{followeeUid}/follow")
-    public ResponseEntity<Void> unfollow(@PathVariable String followeeUid){
+    public ResponseEntity<String> unfollow(@PathVariable String followeeUid){
+        // Context 에서 principal 가져오기
         Object principal= SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        
         if(principal!=null && principal instanceof UserDetailsImpl){
+            // myUid 추출
             String myUid=((UserDetailsImpl)principal).getUid();
-            followService.unfollow(myUid, followeeUid);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            
+            // 언팔로우
+            String result=followService.unfollow(myUid, followeeUid);
+
+            return ResponseEntity.status(HttpStatus.OK).body(result);
         }
         else{
+            // 인증 정보가 없는 경우 언팔로우 불가 (에러 던지기)
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
     }
@@ -121,14 +150,16 @@ public class UserInfoController {
     @ApiOperation("팔로워 목록 조회")
     @GetMapping("/{uid}/followers")
     public ResponseEntity<PageResponseDTO> listFollower(@PathVariable String uid, String cursor){
-        //uid 추출
-        String myUid="";
+        // Context 에서 principal 가져오기
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(principal instanceof UserDetailsImpl){
+
+        // myUid 추출
+        String myUid="";
+        if(principal!=null && principal instanceof UserDetailsImpl){
             myUid=((UserDetailsImpl)principal).getUid();
         }
 
-        //페이지 조회
+        // 페이지 조회
         PageResponseDTO<FollowDTO> result=followService.readFollowerPage(cursor, uid, myUid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
@@ -136,14 +167,16 @@ public class UserInfoController {
     @ApiOperation("팔로잉 목록 조회")
     @GetMapping("/{uid}/followings")
     public ResponseEntity<PageResponseDTO> listFollowing(@PathVariable String uid, String cursor){
-        //uid 추출
-        String myUid="";
+        // Context 에서 principal 가져오기
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(principal instanceof UserDetailsImpl){
+
+        // myUid 추출
+        String myUid="";
+        if(principal!=null && principal instanceof UserDetailsImpl){
             myUid=((UserDetailsImpl)principal).getUid();
         }
 
-        //페이지 조회
+        // 페이지 조회
         PageResponseDTO<FollowDTO> result=followService.readFollowingPage(cursor, uid, myUid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
@@ -156,19 +189,19 @@ public class UserInfoController {
      */
     @ApiOperation("유저 게시글 목록 조회")
     @GetMapping("/{uid}/posts")
-    public ResponseEntity<PageResponseDTO> listPost(@PathVariable String uid, PageRequestDTO pageRequestDTO){
-        //uid 추출
-        String myUid="";
+    public ResponseEntity<PageResponseDTO> listPost(@PathVariable String uid, PageRequestDTO pageRequestDTO, SearchOptionDTO searchOptionDTO){
+        // Context 에서 principal 가져오기
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(principal instanceof UserDetailsImpl){
+
+        // myUid 추출
+        String myUid="";
+        if(principal!=null && principal instanceof UserDetailsImpl){
             myUid=((UserDetailsImpl)principal).getUid();
         }
 
-        //페이지 조회
-        PageRequestDTO pageRequestDTO1= PageRequestDTO.builder()
-                .cursor(pageRequestDTO.getCursor())
-                .build();
-        PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO1, uid, myUid);
+        // 페이지 조회
+        searchOptionDTO.setRelatedUid(uid);
+        PageResponseDTO<PostWithStatusDTO> pageResponseDTO=postService.readPage(pageRequestDTO, searchOptionDTO, myUid);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
 }

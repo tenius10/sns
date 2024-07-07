@@ -1,6 +1,7 @@
 package com.tenius.sns.service;
 
 import com.tenius.sns.dto.CommentDTO;
+import com.tenius.sns.dto.CommentInputDTO;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,26 +15,26 @@ public class CommentServiceTests {
 
     @Test
     public void testRegister(){
-        String uid="x3SzQoEkSRwDnspp";
-        Long pno=1L;
-        CommentDTO commentDTO=CommentDTO.builder()
-                .content("서비스 댓글 등록 테스트")
+        String uid="mILa4I9Yzp2nkI5g";
+        Long pno=4L;
+        CommentInputDTO commentInputDTO=CommentInputDTO.builder()
+                .content("씁 오늘은 옵치가 잘 안 되네 끙...")
                 .build();
-        CommentDTO result=commentService.register(commentDTO, pno, uid);
-        log.info(result);
+        Long result=commentService.register(commentInputDTO, pno, uid);
+        log.info("등록한 댓글의 ID : " + result);
     }
     @Test
-    public void testReadOne(){
+    public void testRead(){
         Long cno=2L;
-        CommentDTO result=commentService.readOne(cno);
+        CommentDTO result=commentService.read(cno);
         log.info(result);
     }
     @Test
     public void testModify(){
         Long cno=1L;
-        CommentDTO commentDTO=CommentDTO.builder().content("댓글 수정 테스트").build();
-        CommentDTO result=commentService.modify(cno, commentDTO);
-        log.info(result);
+        CommentInputDTO commentInputDTO=CommentInputDTO.builder().content("댓글 수정 테스트").build();
+        Long result=commentService.modify(cno, commentInputDTO);
+        log.info("수정한 댓글의 ID : " + result);
     }
     @Test
     public void testRemove(){
@@ -43,16 +44,16 @@ public class CommentServiceTests {
 
     @Test
     public void testLike(){
-        Long cno=1L;
-        String uid="Lt2T09Awufed3wop";
-        CommentDTO result=commentService.like(cno,uid);
-        log.info(result);
+        Long cno=2L;
+        String uid="OaEajAEcfu9HkKJr";
+        Long result=commentService.like(cno,uid);
+        log.info("좋아요 누른 댓글의 ID : " + result);
     }
     @Test
     public void testUnlike(){
-        Long cno=1L;
-        String uid="FEk9MRBg67YpClpU";
-        CommentDTO result=commentService.unlike(cno,uid);
-        log.info(result);
+        Long cno=2L;
+        String uid="OaEajAEcfu9HkKJr";
+        Long result=commentService.unlike(cno,uid);
+        log.info("좋아요 취소한 댓글의 ID : " + result);
     }
 }

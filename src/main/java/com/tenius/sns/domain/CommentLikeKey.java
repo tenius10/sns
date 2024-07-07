@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentStatusKey implements Serializable {
+public class CommentLikeKey implements Serializable {
     private Long cno;
     private String uid;
 }

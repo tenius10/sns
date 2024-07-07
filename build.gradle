@@ -42,21 +42,21 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 
-    //Lombok (테스트 환경)
+    // Lombok (테스트 환경)
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
-    //Swagger UI (문서 정리)
+    // Swagger UI (문서 정리)
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 
-    //ModelMapper (DTO, Entity 간 변환)
+    // ModelMapper (DTO, Entity 간 변환)
     implementation 'org.modelmapper:modelmapper:3.1.0'
 
-    //Validation (데이터 검증)
+    // Validation (데이터 검증)
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    //Querydsl (동적 쿼리 생성)
+    // Querydsl (동적 쿼리 생성)
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
     annotationProcessor(
             "javax.persistence:javax.persistence-api",
@@ -64,16 +64,16 @@ dependencies {
             "com.querydsl:querydsl-apt:${queryDslVersion}:jpa"
     )
 
-    //JWT (토큰 인증)
+    // JWT (토큰 인증)
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.1'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.1'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.1'
 
-    //Redis
+    // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    //Thumbnail (이미지 썸네일 생성)
+    // Thumbnail (이미지 썸네일 생성)
     implementation 'net.coobird:thumbnailator:0.4.16'
 }
 

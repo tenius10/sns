@@ -22,12 +22,12 @@ public class UserRepositoryTests {
 
         UserInfo userInfo= UserInfo.builder()
                 .uid(uid)
-                .nickname("밤샘코딩")
+                .nickname("전투개구리")
                 .intro("오늘 집중이 안 되는 날이네요...뀽..ㅠㅡㅜ")
                 .build();
         User user=User.builder()
-                .username("testuser1")
-                .password(encoder.encode("testpassword1"))
+                .username("testuser3")
+                .password(encoder.encode("testpassword3"))
                 .userInfo(userInfo)
                 .build();
 

@@ -33,8 +33,7 @@ public class FollowRepositoryImpl implements FollowRepositoryCustom {
         if(cursor!=null){
             query.where(follow.fno.lt(cursor));
         }
-        query.orderBy(follow.fno.desc())
-                .limit(pageSize+1);
+        query.orderBy(follow.fno.desc()).limit(pageSize+1);
 
         // 쿼리 실행
         List<UserInfo> userInfoList=query.fetch();

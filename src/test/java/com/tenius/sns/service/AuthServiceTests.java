@@ -22,7 +22,7 @@ public class AuthServiceTests {
                 .password("testpassword1")
                 .nickname("밤샘코딩")
                 .build();
-        UserInfoDTO result=authService.registerUser(signUpRequestDTO);
-        log.info(result);
+        String result=authService.registerUser(signUpRequestDTO);
+        log.info("등록에 성공한 유저 ID" + result);
     }
 }

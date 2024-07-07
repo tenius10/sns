@@ -27,6 +27,6 @@ public interface UserInfoService {
 
     UserInfoDTO read(String uid);
     UserPageDTO readPage(String uid, String myUid);
-    UserInfoDTO modify(String uid, UserInfoDTO userInfoDTO) throws Exception;
+    String modify(String uid, UserInfoDTO userInfoDTO) throws Exception;
 }
 

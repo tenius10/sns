@@ -18,24 +18,24 @@ public class PostServiceTests {
 
     @Test
     public void testRegister(){
-        String uid="OaEajAEcfu9HkKJr";
+        String uid="mILa4I9Yzp2nkI5g";
         PostInputDTO postInputDTO=PostInputDTO.builder()
-                .content("테스트")
+                .content("화귀 처음 볼 때 감정 느껴보고 싶어 크헣")
                 .build();
-        PostDTO result=postService.register(postInputDTO, uid);
-        log.info(result);
+        Long result=postService.register(postInputDTO, uid);
+        log.info("등록된 게시글 ID : " + result);
     }
     @Test
     public void testReadOne(){
         Long pno=2L;
-        PostDTO result=postService.readOne(pno);
+        PostDTO result=postService.readWithFiles(pno);
         log.info(result);
     }
     @Test
     public void testView(){
-        Long pno=81L;
-        String uid="x3SzQoEkSRwDnspp";
-        PostWithStatusDTO result=postService.view(pno, uid);
+        Long pno=2L;
+        String uid="mILa4I9Yzp2nkI5g";
+        PostWithStatusDTO result=postService.viewWithStatus(pno, uid);
         log.info(result);
     }
     @Test
@@ -46,16 +46,16 @@ public class PostServiceTests {
                 .content("서비스 수정 테스트")
                 .build();
         try{
-            PostWithStatusDTO result=postService.modify(pno, postInputDTO, uid);
-            log.info(result);
+            Long result=postService.modify(pno, postInputDTO);
+            log.info("수정된 게시글 ID : " + result);
         } catch(Exception e){
             log.error(e.getMessage());
         }
     }
     @Test
     public void testRemove(){
-        Long pno=81L;
         try{
+            Long pno=3L;
             postService.remove(pno);
         } catch (Exception e){
             log.error(e.getMessage());
@@ -66,7 +66,8 @@ public class PostServiceTests {
         Long cursor=2L;
         String uid="OaEajAEcfu9HkKJr";
         PageRequestDTO pageRequestDTO=PageRequestDTO.builder().cursor(cursor).build();
-        PageResponseDTO<PostWithStatusDTO> result=postService.readPage(pageRequestDTO, null, uid);
+        SearchOptionDTO searchOptionDTO= SearchOptionDTO.builder().build();
+        PageResponseDTO<PostWithStatusDTO> result=postService.readPage(pageRequestDTO, searchOptionDTO, uid);
 
         log.info(pageRequestDTO);
         result.getContent().forEach(postWithStatusDTO->log.info(postWithStatusDTO));
@@ -75,17 +76,17 @@ public class PostServiceTests {
 
     @Test
     public void testLike(){
-        Long pno=1L;
-        String uid="Lt2T09Awufed3wop";
-        PostWithStatusDTO result=postService.like(pno,uid);
-        log.info(result);
+        Long pno=2L;
+        String uid="mILa4I9Yzp2nkI5g";
+        Long result=postService.like(pno,uid);
+        log.info("좋아요 누른 게시글 ID : " + result);
     }
     @Test
     public void testUnlike(){
         Long pno=1L;
         String uid="ugFyVwlT2nqdZH6F";
-        PostWithStatusDTO result=postService.unlike(pno, uid);
-        log.info(result);
+        Long result=postService.unlike(pno, uid);
+        log.info("좋아요 취소한 게시글 ID : " + result);
     }
     @Test
     public void testRegisterWithImages(){
@@ -96,14 +97,14 @@ public class PostServiceTests {
                         ,UUID.randomUUID()+"_사진2.jpg"
                         ,UUID.randomUUID()+"_사진3.jpg"))
                 .build();
-        PostDTO result=postService.register(postInputDTO, uid);
-        log.info(result);
+        Long result=postService.register(postInputDTO, uid);
+        log.info("등록된 게시글 ID : " + result);
     }
     @Test
     public void testViewWithImage(){
         Long pno=94L;
         String uid="x3SzQoEkSRwDnspp";
-        PostWithStatusDTO result=postService.view(pno, uid);
+        PostWithStatusDTO result=postService.viewWithStatus(pno, uid);
         log.info(result);
     }
     @Test
@@ -115,8 +116,8 @@ public class PostServiceTests {
                 .fileNames(List.of(UUID.randomUUID()+"_수정된 사진1.jpg", UUID.randomUUID()+"_수정된 사진2.jpg"))
                 .build();
         try{
-            PostWithStatusDTO result=postService.modify(pno, postInputDTO, uid);
-            log.info(result);
+            Long result=postService.modify(pno, postInputDTO);
+            log.info("수정된 게시글 ID : " + result);
         } catch(Exception e){
             log.error(e.getMessage());
         }

@@ -25,46 +25,66 @@ public class CommentController {
     @ApiOperation("특정 게시글 댓글 목록 조회")
     @GetMapping("")
     public ResponseEntity<PageResponseDTO> list(@PathVariable Long pno, PageRequestDTO pageRequestDTO){
-        //uid 추출
-        String uid="";
+        // Context 에서 principal 가져오기
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(principal instanceof UserDetailsImpl){
-            uid=((UserDetailsImpl)principal).getUid();
+
+        // myUid 추출
+        String myUid="";
+        if(principal!=null && principal instanceof UserDetailsImpl){
+            myUid=((UserDetailsImpl)principal).getUid();
         }
 
-        //페이지 조회
-        PageResponseDTO<CommentWithStatusDTO> pageResponseDTO=commentService.readPage(pageRequestDTO, pno, uid);
+        // 페이지 조회
+        PageResponseDTO<CommentWithStatusDTO> pageResponseDTO=commentService.readPage(pageRequestDTO, pno, myUid);
         return ResponseEntity.status(HttpStatus.OK).body(pageResponseDTO);
     }
 
     @ApiOperation("특정 댓글 조회")
     @GetMapping("/{cno}")
     public ResponseEntity<CommentDTO> read(@PathVariable Long pno, @PathVariable Long cno){
-        CommentDTO result=commentService.readOne(cno);
+        // Context 에서 principal 가져오기
+        Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // myUid 추출
+        String myUid="";
+        if(principal!=null && principal instanceof UserDetailsImpl){
+            myUid=((UserDetailsImpl)principal).getUid();
+        }
+
+        // 댓글 조회
+        CommentDTO result=commentService.readWithStatus(cno, myUid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @ApiOperation("특정 게시글 댓글 등록")
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value="", consumes= MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommentDTO> create(@PathVariable Long pno, @Valid @RequestBody CommentDTO commentDTO){
+    public ResponseEntity<Long> create(@PathVariable Long pno, @Valid @RequestBody CommentInputDTO commentInputDTO){
+        // Context 에서 principal 가져오기
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uid=null;
-        if(principal instanceof UserDetailsImpl){
-            uid=((UserDetailsImpl)principal).getUid();
+
+        // myUid 추출
+        String myUid="";
+        if(principal!=null && principal instanceof UserDetailsImpl){
+            myUid=((UserDetailsImpl)principal).getUid();
         }
-        if(uid==null){
+
+        // 인증 정보가 없는 경우 등록 불가 (에러 던지기)
+        if(myUid.isEmpty()){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
-        CommentDTO result=commentService.register(commentDTO, pno, uid);
+        
+        // 댓글 등록
+        Long result=commentService.register(commentInputDTO, pno, myUid);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @ApiOperation("특정 댓글 수정")
     @PreAuthorize("@commentServiceImpl.isCommentWriter(#cno, principal.getUid())")
     @PutMapping(value="/{cno}", consumes=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommentDTO> update(@PathVariable Long pno, @PathVariable Long cno, @Valid @RequestBody CommentDTO commentDTO){
-        CommentDTO result=commentService.modify(cno, commentDTO);
+    public ResponseEntity<Long> update(@PathVariable Long pno, @PathVariable Long cno, @Valid @RequestBody CommentInputDTO commentInputDTO){
+        // 댓글 수정
+        Long result=commentService.modify(cno, commentInputDTO);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -72,6 +92,7 @@ public class CommentController {
     @PreAuthorize("@commentServiceImpl.isCommentWriter(#cno, principal.getUid())")
     @DeleteMapping("/{cno}")
     public ResponseEntity<Void> delete(@PathVariable Long pno, @PathVariable Long cno){
+        // 댓글 삭제
         commentService.remove(cno);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -79,32 +100,46 @@ public class CommentController {
     @ApiOperation("특정 댓글 좋아요")
     @PreAuthorize("isAuthenticated() and !@commentServiceImpl.isCommentWriter(#cno, principal.getUid())")
     @PostMapping("/{cno}/like")
-    public ResponseEntity<CommentDTO> like(@PathVariable Long pno, @PathVariable Long cno){
+    public ResponseEntity<Long> like(@PathVariable Long pno, @PathVariable Long cno){
+        // Context 에서 principal 가져오기
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uid=null;
-        if(principal instanceof UserDetailsImpl){
-            uid=((UserDetailsImpl)principal).getUid();
+
+        // myUid 추출
+        String myUid="";
+        if(principal!=null && principal instanceof UserDetailsImpl){
+            myUid=((UserDetailsImpl)principal).getUid();
         }
-        if(uid==null){
+
+        // 인증 정보가 없는 경우 좋아요 불가 (에러 던지기)
+        if(myUid.isEmpty()){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
-        CommentDTO result=commentService.like(cno, uid);
+
+        // 댓글 좋아요
+        Long result=commentService.like(cno, myUid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @ApiOperation("특정 댓글 좋아요 취소")
     @PreAuthorize("isAuthenticated() and !@commentServiceImpl.isCommentWriter(#cno, principal.getUid())")
     @DeleteMapping("/{cno}/like")
-    public ResponseEntity<CommentDTO> unlike(@PathVariable Long pno, @PathVariable Long cno){
+    public ResponseEntity<Long> unlike(@PathVariable Long pno, @PathVariable Long cno){
+        // Context 에서 principal 가져오기
         Object principal=SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uid=null;
-        if(principal instanceof UserDetailsImpl){
-            uid=((UserDetailsImpl)principal).getUid();
+
+        // myUid 추출
+        String myUid="";
+        if(principal!=null && principal instanceof UserDetailsImpl){
+            myUid=((UserDetailsImpl)principal).getUid();
         }
-        if(uid==null){
+
+        // 인증 정보가 없는 경우 좋아요 취소 불가 (에러 던지기)
+        if(myUid.isEmpty()){
             throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
         }
-        CommentDTO result=commentService.unlike(cno, uid);
+
+        // 댓글 좋아요 취소
+        Long result=commentService.unlike(cno, myUid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

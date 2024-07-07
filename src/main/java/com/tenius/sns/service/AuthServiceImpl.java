@@ -38,8 +38,8 @@ public class AuthServiceImpl implements AuthService {
      * @return 유저 정보 반환
      */
     @Override
-    public UserInfoDTO registerUser(SignUpRequestDTO signUpRequestDTO) throws InputValueException {
-        //아이디, 이메일, 닉네임 중복 검사
+    public String registerUser(SignUpRequestDTO signUpRequestDTO) throws InputValueException {
+        // 아이디, 이메일, 닉네임 중복 검사
         if (userRepository.existsByUsername(signUpRequestDTO.getUsername())) {
             throw new InputValueException(InputValueException.ERROR.DUPLICATE_USERNAME);
         }
@@ -51,14 +51,14 @@ public class AuthServiceImpl implements AuthService {
             throw new InputValueException(InputValueException.ERROR.DUPLICATE_NICKNAME);
         }
 
-        //유저 계정 생성
+        // 유저 계정 생성
         String uid= util.generateUid();
-        //중복되지 않는 uid 인지 확인하는 코드가 들어가면 좋겠다.
-        //어지간해서는 안 겹치겠지만 겹쳤을 때 위험하니까.
+        // 중복되지 않는 uid 인지 확인하는 코드가 들어가면 좋겠다.
+        // 어지간해서는 안 겹치겠지만 겹쳤을 때 위험하니까.
 
-        //패스워드의 복잡성을 검사하는 코드도 필요하고
-        //이메일 형식 검사와
-        //실제로 존재하는 본인 이메일인지 확인하는 기능도 필요
+        // 패스워드의 복잡성을 검사하는 코드도 필요하고
+        // 이메일 형식 검사와
+        // 실제로 존재하는 본인 이메일인지 확인하는 기능도 필요
 
         UserInfo userInfo= UserInfo.builder()
                 .uid(uid)
@@ -72,9 +72,11 @@ public class AuthServiceImpl implements AuthService {
                 .userInfo(userInfo)
                 .build();
 
-        //User, UserInfo 는 OneToOne 으로 연결되어 있기 때문에 하나만 저장
+        // User, UserInfo 는 OneToOne 으로 연결되어 있기 때문에 하나만 저장
         User result = userRepository.save(user);
-        return UserInfoService.entityToDTO(result.getUserInfo());
+
+        // 등록에 성공한 유저 ID 반환
+        return result.getUserInfo().getUid();
     }
 
     @Override

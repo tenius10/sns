@@ -23,4 +23,12 @@ public class CommentRepositoryTests {
         log.info("다음 페이지 존재 여부: "+result.isHasNext());
         result.getContent().forEach(commentDTO->log.info(commentDTO));
     }
+
+    @Test
+    public void testRead(){
+        Long cno=2L;
+        String uid="OaEajAEcfu9HkKJr";
+        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno, uid).orElseThrow();
+        log.info(result);
+    }
 }

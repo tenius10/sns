@@ -33,8 +33,9 @@ public class AuthController {
 
     @ApiOperation("회원가입")
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserInfoDTO> signUp(@Valid @RequestBody SignUpRequestDTO signUpRequestDTO){
-        UserInfoDTO userInfoDTO=authService.registerUser(signUpRequestDTO);
+    public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequestDTO signUpRequestDTO){
+        // 유저 등록
+        String userInfoDTO=authService.registerUser(signUpRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(userInfoDTO);
     }
 
@@ -42,21 +43,21 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        //쿠키 없애기
+        // 쿠키 없애기
         response.addHeader(HttpHeaders.SET_COOKIE, jwtUtil.getClearAccessTokenCookie().toString());
         response.addHeader(HttpHeaders.SET_COOKIE, jwtUtil.getClearRefreshTokenCookie().toString());
 
-        //SecurityContext 비우기
+        // SecurityContext 비우기
         SecurityContextHolder.clearContext();
 
-        //토큰 블랙리스트 등록
+        // 토큰 블랙리스트 등록
         String accessToken= jwtUtil.getAccessTokenFromCookies(request);
         String refreshToken= jwtUtil.getRefreshTokenFromCookies(request);
 
         authService.registerTokenInBlacklist(accessToken, jwtUtil.TOKEN_BLACKLIST_REASON);
         authService.registerTokenInBlacklist(refreshToken, jwtUtil.TOKEN_BLACKLIST_REASON);
 
-        //응답 구성
+        // 응답 구성
         response.setStatus(HttpServletResponse.SC_OK);
 
         Gson gson = new Gson();
@@ -70,36 +71,37 @@ public class AuthController {
     @PostMapping("/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try{
-            //Refresh Token 가져오기
+            // Refresh Token 가져오기
             String refreshToken= jwtUtil.getRefreshTokenFromCookies(request);
 
+            // Refresh Token 이 없으면 토큰 재발급 불가 (에러 던지기)
             if(refreshToken==null){
                 throw new TokenException(TokenException.TOKEN_ERROR.UNACCEPT);
             }
 
-            //Refresh Token 이 유효하다면
+            // Refresh Token 이 유효하다면
             if(jwtUtil.validateToken(refreshToken) && !authService.isTokenInBlacklist(refreshToken)){
-                //Refresh Token 만료까지 남은 시간 계산
+                // Refresh Token 만료까지 남은 시간 계산
                 long expTime= jwtUtil.getExpirationFromJwtToken(refreshToken).getTime();
                 long nowTime = System.currentTimeMillis();
                 long diff = expTime - nowTime;
 
-                //응답 구성
+                // 응답 구성
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 response.setStatus(HttpServletResponse.SC_OK);
 
-                //Access Token 재발급
+                // Access Token 재발급
                 String username= jwtUtil.getUserNameFromJwtToken(refreshToken);
                 ResponseCookie accessTokenCookie= jwtUtil.getAccessTokenCookie(username);
                 response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
 
-                //Refresh Token 만료까지 남은 시간이 적으면, Refresh Token 도 재발급
+                // Refresh Token 만료까지 남은 시간이 적으면, Refresh Token 도 재발급
                 if(diff < jwtUtil.REFRESH_TOKEN_REISSUE_MS){
                     ResponseCookie refreshTokenCookie= jwtUtil.getRefreshTokenCookie(username);
                     response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
                 }
 
-                //응답 본문 구성
+                // 응답 본문 구성
                 Gson gson = new Gson();
                 ErrorResponse errorResponse=new ErrorResponse();
                 errorResponse.putItem("message", "Token Refresh Successful");

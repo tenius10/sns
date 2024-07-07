@@ -1,12 +1,9 @@
 package com.tenius.sns.service;
 
 import com.tenius.sns.domain.*;
-import com.tenius.sns.dto.CommentDTO;
-import com.tenius.sns.dto.CommentWithStatusDTO;
-import com.tenius.sns.dto.PageRequestDTO;
-import com.tenius.sns.dto.PageResponseDTO;
+import com.tenius.sns.dto.*;
 import com.tenius.sns.repository.CommentRepository;
-import com.tenius.sns.repository.CommentStatusRepository;
+import com.tenius.sns.repository.CommentLikeRepository;
 import com.tenius.sns.repository.PostRepository;
 import com.tenius.sns.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,86 +17,100 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
-    private final CommentStatusRepository commentStatusRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
     private final UserInfoRepository userInfoRepository;
 
     @Override
-    public CommentDTO register(CommentDTO commentDTO, Long pno, String uid){
+    public Long register(CommentInputDTO commentInputDTO, Long pno, String myUid){
+        // 게시글 정보 가져오기
         Post post=postRepository.findById(pno).orElseThrow();
-        UserInfo userInfo=userInfoRepository.findById(uid).orElseThrow();
+
+        // 작성자의 유저 정보 가져오기
+        UserInfo userInfo=userInfoRepository.findById(myUid).orElseThrow();
+
+        // Comment 엔티티 생성
         Comment comment=Comment.builder()
-                .content(commentDTO.getContent())
+                .content(commentInputDTO.getContent())
                 .post(post)
                 .writer(userInfo)
                 .build();
+
+        // 댓글 엔티티 DB에 저장
         Comment result=commentRepository.save(comment);
-        return CommentService.entityToDTO(result);
+        
+        // 등록된 댓글의 ID 반환
+        return result.getCno();
     }
 
     @Override
-    public CommentDTO readOne(Long cno){
+    public CommentDTO read(Long cno){
+        // 댓글 조회
         Comment result=commentRepository.findById(cno).orElseThrow();
         return CommentService.entityToDTO(result);
     }
 
     @Override
-    public CommentDTO modify(Long cno, CommentDTO commentDTO){
+    public CommentWithStatusDTO readWithStatus(Long cno, String myUid){
+        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno, myUid).orElseThrow();
+        return result;
+    }
+
+    @Override
+    public Long modify(Long cno, CommentInputDTO commentInputDTO){
+        // 기존 댓글 정보 가져오기
         Comment comment=commentRepository.findById(cno).orElseThrow();
-        comment.changeContent(commentDTO.getContent());
+        
+        // 댓글 수정
+        comment.changeContent(commentInputDTO.getContent());
+        
+        // 수정한 댓글을 DB에 저장
         Comment result=commentRepository.save(comment);
-        return CommentService.entityToDTO(result);
+        
+        // 수정된 댓글의 ID 반환
+        return result.getCno();
     }
 
     @Override
     public void remove(Long cno){
+        // 댓글을 DB에서 삭제
         commentRepository.deleteById(cno);
     }
 
 
     @Override
-    public PageResponseDTO<CommentWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, Long pno, String uid){
-        PageResponseDTO<CommentWithStatusDTO> result=commentRepository.search(pageRequestDTO, pno, uid);
+    public PageResponseDTO<CommentWithStatusDTO> readPage(PageRequestDTO pageRequestDTO, Long pno, String myUid){
+        // 페이지 조회
+        PageResponseDTO<CommentWithStatusDTO> result=commentRepository.search(pageRequestDTO, pno, myUid);
         return result;
     }
 
     @Override
-    public boolean isCommentWriter(Long cno, String uid){
+    public boolean isCommentWriter(Long cno, String myUid){
+        // 댓글 정보 가져오기
         Comment comment=commentRepository.findById(cno).orElseThrow();
-        return comment.getWriter().getUid().equals(uid);
+        
+        // 댓글의 작성자와 myUid 비교
+        return comment.getWriter().getUid().equals(myUid);
     }
 
     @Override
-    public CommentWithStatusDTO like(Long cno, String uid){
-        CommentStatusKey key=CommentStatusKey.builder().cno(cno).uid(uid).build();
-        Optional<CommentStatus> optional=commentStatusRepository.findById(key);
+    public Long like(Long cno, String myUid){
+        // 댓글 좋아요 정보를 DB에 저장
+        CommentLike commentLike=CommentLike.builder().cno(cno).uid(myUid).build();
+        commentLikeRepository.save(commentLike);
 
-        //좋아요가 이미 눌린 상황이 아니라면
-        if(!(!optional.isEmpty()&&optional.get().isLiked())){
-            CommentStatus commentStatus=optional.isEmpty()?
-                    CommentStatus.builder().cno(cno).uid(uid).build()
-                    : optional.get();
-            commentStatus.changeLiked(true);
-            commentStatusRepository.saveWithCheck(commentStatus);
-        }
-
-        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno, uid).orElseThrow();
-        return result;
+        // 좋아요 누른 댓글의 ID 반환
+        return cno;
     }
 
     @Override
-    public CommentWithStatusDTO unlike(Long cno, String uid){
-        CommentStatusKey key=CommentStatusKey.builder().cno(cno).uid(uid).build();
-        Optional<CommentStatus> optional=commentStatusRepository.findById(key);
+    public Long unlike(Long cno, String myUid){
+        // 댓글 좋아요 정보를 DB에서 삭제
+        CommentLikeKey commentLikeKey= CommentLikeKey.builder().cno(cno).uid(myUid).build();
+        commentLikeRepository.deleteById(commentLikeKey);
 
-        //좋아요가 이미 취소된 상황이 아니라면
-        if(!optional.isEmpty() && optional.get().isLiked()){
-            CommentStatus commentStatus=optional.get();
-            commentStatus.changeLiked(false);
-            commentStatusRepository.saveWithCheck(commentStatus);
-        }
-
-        CommentWithStatusDTO result=commentRepository.findByIdWithAll(cno,uid).orElseThrow();
-        return result;
+        // 좋아요 취소한 댓글의 ID 반환
+        return cno;
     }
 }

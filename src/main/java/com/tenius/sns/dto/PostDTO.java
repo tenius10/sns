@@ -18,13 +18,13 @@ public class PostDTO {
     private Long pno;
     private String content;
     private UserInfoDTO writer;
+    @Builder.Default
+    private int views=0;
+    private List<String> fileNames;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime regDate;
     @JsonIgnore
     private LocalDateTime modDate;
-    @Builder.Default
-    private int views=0;
-    private List<String> fileNames;
 
     public PostDTO(PostDTO copy){
         this.pno=copy.pno;
